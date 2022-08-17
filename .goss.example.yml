@@ -1,0 +1,22 @@
+# 云存储类型
+driver: aliyun
+
+aliyun:
+  # oss 的链接，不同区域不同
+  endpoint:
+  # bucket
+  bucket:
+  access_key_id:
+  access_key_secret:
+
+tencent:
+  url:
+  secret_id:
+  secret_key:
+
+qiniu:
+  bucket:
+  access_key:
+  secret_key:
+  domain:
+  private:
