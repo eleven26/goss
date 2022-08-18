@@ -99,7 +99,10 @@ fmt.Println(storage.Get("test/foo.txt"))
 `goss` 支持以下操作：
 
 - [Put](#Put)
+- [PutFromFile](#PutFromFile)
 - [Get](#Get)
+- [GetString](#GetString)
+- [GetBytes](#GetBytes)
 - [Delete](#Delete)
 - [Save](#Save)
 - [Exists](#Exists)
@@ -108,18 +111,51 @@ fmt.Println(storage.Get("test/foo.txt"))
 
 ### Put
 
-上传文件到云存储。
+上传文件到云存储。第一个参数是 key，第二个参数是 `io.Reader`。
 
 ```go
-err := storage.Put("test/test.txt", "/path/to/test.txt")
+data := []byte("this is some data stored as a byte slice in Go Lang!")
+r := bytes.NewReader(data)
+err := storage.Put("test/test.txt", r)
+```
+
+### PutFromFile
+
+上传文件到云存储。第一个参数是 key，第二个参数是本地文件路径。
+
+```go
+err := storage.PutFromFile("test/test.txt", "/path/to/test.txt")
 ```
 
 ### Get
 
-从云存储获取文件，返回字符串。
+从云存储获取文件，返回字符串。参数是 key。返回值是 `io.ReadCloser` 和 `error`。
 
 ```go
-content, err := storage.Get("test/test.txt")
+// rc 是 `io.ReadCloser`
+rc, err := storage.Get("test/test.txt")
+defer rc.Close()
+
+bs, err := ioutil.ReadAll(rc)
+fmt.Println(string(bs))
+```
+
+### GetString
+
+从云存储获取文件，返回字符串。参数是 key。返回值是 `string` 和 `error`
+
+```go
+content, err := storage.GetString("test/test.txt")
+fmt.Println(content)
+```
+
+### GetBytes
+
+从云存储获取文件，返回字符串。参数是 key。返回值是 `[]byte` 和 `error`
+
+```go
+bs, err := storage.Get("test/test.txt")
+fmt.Println(string(bs))
 ```
 
 ### Delete

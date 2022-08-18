@@ -32,6 +32,9 @@ func TestUseDriver(t *testing.T) {
 	}
 
 	driver := DriverStub{}
+	err := kernel.UseDriver(driver)
+	assert.NotNil(t, err)
+
 	storage, err := driver.Storage()
 	if err != nil {
 		t.Fatal(err)
