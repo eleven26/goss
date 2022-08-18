@@ -50,7 +50,7 @@ func (s *Storage) GetBytes(key string) (bytes []byte, err error) {
 	return ioutil.ReadAll(rc)
 }
 
-func (s *Storage) Save(key string, localPath string) (err error) {
+func (s *Storage) GetToFile(key string, localPath string) (err error) {
 	if !viper.GetBool("show_progress_bar") {
 		return s.store.SaveToFile(key, localPath)
 	}

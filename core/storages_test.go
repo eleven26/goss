@@ -33,7 +33,7 @@ func (s StorageStub) Delete(key string) error {
 	panic("implement me")
 }
 
-func (s StorageStub) Save(key string, localPath string) error {
+func (s StorageStub) GetToFile(key string, localPath string) error {
 	panic("implement me")
 }
 

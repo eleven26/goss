@@ -41,7 +41,7 @@ var getCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		getCmdArgs := parseGetCmdArgs(cmd, args)
 
-		err := app.Storage.Save(getCmdArgs.Key, getCmdArgs.Target)
+		err := app.Storage.GetToFile(getCmdArgs.Key, getCmdArgs.Target)
 		if err != nil {
 			log.Fatal(err)
 		}

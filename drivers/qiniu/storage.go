@@ -55,7 +55,7 @@ func (s *Storage) Delete(key string) error {
 	return s.store.Delete(key)
 }
 
-func (s *Storage) Save(key string, localPath string) error {
+func (s *Storage) GetToFile(key string, localPath string) error {
 	return s.store.SaveToFile(key, localPath)
 }
 

@@ -14,11 +14,11 @@ type Storage interface {
 	GetString(key string) (string, error)
 	// GetBytes 获取 key 指向的文件，返回字节数组
 	GetBytes(key string) ([]byte, error)
+	// GetToFile 保存 key 指向的文件到本地 localPath
+	GetToFile(key string, localPath string) error
 
 	// Delete 删除 key 指向的文件
 	Delete(key string) error
-	// Save 保存 key 指向的文件到本地 localPath
-	Save(key string, localPath string) error
 	// Exists 判断文件是否存在
 	Exists(key string) (bool, error)
 	// Files 列出指定目录下的所有文件

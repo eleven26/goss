@@ -163,7 +163,7 @@ func TestSave(t *testing.T) {
 	setUp(t)
 	defer tearDown(t)
 
-	err := storage.Save(key, localFooPath)
+	err := storage.GetToFile(key, localFooPath)
 	assert.Nil(t, err)
 	assert.Equal(t, "foo", fs.MustGetString(localFooPath))
 }

@@ -103,8 +103,8 @@ fmt.Println(storage.Get("test/foo.txt"))
 - [Get](#Get)
 - [GetString](#GetString)
 - [GetBytes](#GetBytes)
+- [GetToFile](#GetToFile)
 - [Delete](#Delete)
-- [Save](#Save)
 - [Exists](#Exists)
 - [Files](#Files)
 - [Size](#Size)
@@ -158,21 +158,21 @@ bs, err := storage.Get("test/test.txt")
 fmt.Println(string(bs))
 ```
 
+### GetToFile
+
+下载云存储文件到本地。第一个参数是 key，第二个参数是本地路径。
+
+```go
+// 第一个参数是云端路径，第二个参数是本地路径
+err := storage.GetToFile("test/test.txt", "/path/to/local")
+```
+
 ### Delete
 
 删除云存储文件。
 
 ```go
 err := storage.Delete("test/test.txt")
-```
-
-### Save
-
-下载云存储文件到本地。
-
-```go
-// 第一个参数是云端路径，第二个参数是本地路径
-err := storage.Save("test/test.txt", "/path/to/local")
 ```
 
 ### Exists
