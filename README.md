@@ -8,6 +8,7 @@
 [![codecov](https://codecov.io/gh/eleven26/goss/branch/main/graph/badge.svg?token=UU4lLD2n4k)](https://codecov.io/gh/eleven26/goss)
 [![GitHub license](https://img.shields.io/github/license/eleven26/goss)](https://github.com/eleven26/goss/blob/main/LICENSE)
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/eleven26/goss)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/eleven26/goss)
 
 
 ## 🚀 安装
