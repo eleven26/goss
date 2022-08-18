@@ -18,8 +18,7 @@
 
 .goss.yml
 
-bin/*
-!bin/.gitkeep
+bin
 
 *.temp
 
