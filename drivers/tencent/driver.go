@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/eleven26/goss/v2/core"
+	"github.com/eleven26/goss/core"
 	"github.com/tencentyun/cos-go-sdk-v5"
 )
 

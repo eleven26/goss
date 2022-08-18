@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	config2 "github.com/eleven26/goss/v2/config"
-	"github.com/eleven26/goss/v2/core"
-	"github.com/eleven26/goss/v2/utils"
+	config2 "github.com/eleven26/goss/config"
+	"github.com/eleven26/goss/core"
+	"github.com/eleven26/goss/utils"
 
 	fs "github.com/eleven26/go-filesystem"
 	"github.com/spf13/viper"

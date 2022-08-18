@@ -4,7 +4,7 @@ import (
 	"io"
 	"io/ioutil"
 
-	"github.com/eleven26/goss/v2/core"
+	"github.com/eleven26/goss/core"
 )
 
 type Storage struct {

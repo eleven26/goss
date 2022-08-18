@@ -4,7 +4,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/eleven26/goss/v2/core"
+	"github.com/eleven26/goss/core"
 
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 )

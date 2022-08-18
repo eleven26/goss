@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/eleven26/goss/v2/config"
+	"github.com/eleven26/goss/config"
 
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
