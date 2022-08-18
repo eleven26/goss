@@ -3,10 +3,10 @@ package goss
 import (
 	"errors"
 
-	"github.com/eleven26/goss/core"
-	"github.com/eleven26/goss/drivers/aliyun"
-	"github.com/eleven26/goss/drivers/qiniu"
-	"github.com/eleven26/goss/drivers/tencent"
+	"github.com/eleven26/goss/v2/core"
+	"github.com/eleven26/goss/v2/drivers/aliyun"
+	"github.com/eleven26/goss/v2/drivers/qiniu"
+	"github.com/eleven26/goss/v2/drivers/tencent"
 
 	"github.com/spf13/viper"
 )

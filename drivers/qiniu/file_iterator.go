@@ -3,7 +3,7 @@ package qiniu
 import (
 	"errors"
 
-	"github.com/eleven26/goss/core"
+	"github.com/eleven26/goss/v2/core"
 	"github.com/qiniu/go-sdk/v7/storage"
 )
 

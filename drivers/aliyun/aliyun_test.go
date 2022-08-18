@@ -12,9 +12,9 @@ import (
 	"reflect"
 	"testing"
 
-	config2 "github.com/eleven26/goss/config"
-	"github.com/eleven26/goss/core"
-	"github.com/eleven26/goss/utils"
+	config2 "github.com/eleven26/goss/v2/config"
+	"github.com/eleven26/goss/v2/core"
+	"github.com/eleven26/goss/v2/utils"
 
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	fs "github.com/eleven26/go-filesystem"

@@ -1,11 +1,11 @@
 package goss
 
 import (
-	"github.com/eleven26/goss/config"
-	"github.com/eleven26/goss/core"
-	"github.com/eleven26/goss/drivers/aliyun"
-	"github.com/eleven26/goss/drivers/qiniu"
-	"github.com/eleven26/goss/drivers/tencent"
+	"github.com/eleven26/goss/v2/config"
+	"github.com/eleven26/goss/v2/core"
+	"github.com/eleven26/goss/v2/drivers/aliyun"
+	"github.com/eleven26/goss/v2/drivers/qiniu"
+	"github.com/eleven26/goss/v2/drivers/tencent"
 )
 
 type Goss struct {

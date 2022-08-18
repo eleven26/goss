@@ -3,7 +3,7 @@ package tencent
 import (
 	"time"
 
-	"github.com/eleven26/goss/core"
+	"github.com/eleven26/goss/v2/core"
 	"github.com/tencentyun/cos-go-sdk-v5"
 )
 
