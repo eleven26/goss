@@ -8,42 +8,43 @@ import (
 	"github.com/spf13/viper"
 )
 
-func ReadInConfig(path string) {
+func ReadInConfig(path string) error {
 	exist, err := fs.Exists(path)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	if !exist {
-		panic(fmt.Errorf("配置文件不存在：%s\n", path))
+		return fmt.Errorf("配置文件不存在：%s\n", path)
 	}
 
 	viper.SetConfigFile(path)
 
-	err = viper.ReadInConfig()
+	return viper.ReadInConfig()
+}
+
+func ReadInUserHomeConfig() error {
+	path, err := UserHomeConfigPath()
 	if err != nil {
-		panic(fmt.Errorf("Fatal error config file: %s \n", err))
+		return err
 	}
+
+	return ReadInConfig(path)
 }
 
-func ReadInUserHomeConfig() {
-	path := UserHomeConfigPath()
-	ReadInConfig(path)
-}
-
-func UserHomeConfigPath() string {
+func UserHomeConfigPath() (string, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 
 	file := home + "/.goss.yml"
 	exist, err := fs.Exists(file)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 	if !exist {
-		panic(fmt.Errorf("配置文件不存在：%s\n", file))
+		return "", fmt.Errorf("配置文件不存在：%s\n", file)
 	}
 
-	return file
+	return file, nil
 }

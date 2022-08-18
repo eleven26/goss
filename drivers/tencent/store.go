@@ -2,6 +2,7 @@ package tencent
 
 import (
 	"context"
+	"io"
 
 	"github.com/eleven26/goss/core"
 	"github.com/tencentyun/cos-go-sdk-v5"
@@ -11,7 +12,11 @@ type Store struct {
 	client *cos.Client
 }
 
-func (s *Store) Put(key string, localPath string) (*cos.Response, error) {
+func (s *Store) Put(key string, r io.Reader) (*cos.Response, error) {
+	return s.client.Object.Put(context.Background(), key, r, nil)
+}
+
+func (s *Store) PutFromFile(key string, localPath string) (*cos.Response, error) {
 	return s.client.Object.PutFromFile(context.Background(), key, localPath, nil)
 }
 

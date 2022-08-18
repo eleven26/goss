@@ -13,24 +13,30 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	configPath := config.UserHomeConfigPath()
-
 	var goss Goss
+	var err error
+	var configPath string
+
+	configPath, err = config.UserHomeConfigPath()
+	assert.Nil(t, err)
 
 	viper.Set("driver", Aliyun)
-	goss = New(configPath)
+	goss, err = New(configPath)
+	assert.Nil(t, err)
 	assert.Equal(t, "aliyun.Storage", reflect.TypeOf(goss.Storage.Storage()).Elem().String())
 
 	viper.Set("driver", Tencent)
-	goss = New(configPath)
+	goss, err = New(configPath)
+	assert.Nil(t, err)
 	assert.Equal(t, "tencent.Storage", reflect.TypeOf(goss.Storage.Storage()).Elem().String())
 
 	viper.Set("driver", Qiniu)
-	goss = New(configPath)
+	goss, err = New(configPath)
+	assert.Nil(t, err)
 	assert.Equal(t, "qiniu.Storage", reflect.TypeOf(goss.Storage.Storage()).Elem().String())
 
 	viper.Set("driver", "not_exists")
-	assert.Panics(t, func() {
-		goss = New(configPath)
-	})
+	goss, err = New(configPath)
+	assert.NotNil(t, err)
+	assert.ErrorIs(t, err, errorDriverNotExists)
 }

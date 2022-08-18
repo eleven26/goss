@@ -1,17 +1,22 @@
 package cmd
 
 import (
-	"github.com/eleven26/goss/config"
+	"log"
+
 	"github.com/eleven26/goss/goss"
 )
 
 var app goss.Goss
 
 func Run() {
-	app = goss.New(config.UserHomeConfigPath())
-
-	err := Execute()
+	var err error
+	app, err = goss.NewFromUserHomeConfigPath()
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
+	}
+
+	err = Execute()
+	if err != nil {
+		log.Fatal(err)
 	}
 }

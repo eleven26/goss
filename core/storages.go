@@ -1,34 +1,39 @@
 package core
 
 import (
+	"errors"
 	"fmt"
 )
+
+var errExistsDriver = errors.New("已存在的类型")
 
 type Storages struct {
 	storages map[string]Storage
 }
 
-func (s *Storages) Get(name string) Storage {
+func (s *Storages) Get(name string) (Storage, error) {
 	if s.storages == nil {
-		panic("没有有效的驱动！")
+		return nil, errors.New("没有有效的驱动！")
 	}
 
 	storage, ok := s.storages[name]
 	if !ok {
-		panic(fmt.Errorf("不支持的类型: %s", name))
+		return nil, fmt.Errorf("不支持的类型: %s", name)
 	}
 
-	return storage
+	return storage, nil
 }
 
-func (s *Storages) Register(name string, storage Storage) {
+func (s *Storages) Register(name string, storage Storage) error {
 	if s.storages == nil {
 		s.storages = make(map[string]Storage)
 	}
 
 	if _, ok := s.storages[name]; ok {
-		panic(fmt.Errorf("已存在的类型：%s", name))
+		return errExistsDriver
 	}
 
 	s.storages[name] = storage
+
+	return nil
 }

@@ -12,24 +12,51 @@ type Goss struct {
 	core.Kernel
 }
 
-func New(configPath string) Goss {
-	config.ReadInConfig(configPath)
+func New(configPath string) (Goss, error) {
+	err := config.ReadInConfig(configPath)
+	if err != nil {
+		return Goss{}, err
+	}
 
 	goss := Goss{
 		core.New(),
 	}
 
-	goss.RegisterDriver(aliyun.NewDriver())
-	goss.RegisterDriver(tencent.NewDriver())
-	goss.RegisterDriver(qiniu.NewDriver())
+	driver, err := defaultDriver()
+	if err != nil {
+		return Goss{}, err
+	}
 
-	goss.UseDriver(defaultDriver())
+	err = goss.RegisterDriver(driver)
+	if err != nil {
+		return Goss{}, err
+	}
 
-	return goss
+	err = goss.UseDriver(driver)
+	if err != nil {
+		return Goss{}, err
+	}
+
+	return goss, nil
 }
 
-func Storage(configPath string) core.Storage {
-	goss := New(configPath)
+func (g *Goss) RegisterAliyunDriver() error {
+	return g.RegisterDriver(aliyun.NewDriver())
+}
 
-	return goss.Storage
+func (g *Goss) RegisterTencentDriver() error {
+	return g.RegisterDriver(tencent.NewDriver())
+}
+
+func (g *Goss) RegisterQiniuDriver() error {
+	return g.RegisterDriver(qiniu.NewDriver())
+}
+
+func NewFromUserHomeConfigPath() (Goss, error) {
+	path, err := config.UserHomeConfigPath()
+	if err != nil {
+		return Goss{}, err
+	}
+
+	return New(path)
 }

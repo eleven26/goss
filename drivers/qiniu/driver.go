@@ -12,24 +12,24 @@ func NewDriver() core.Driver {
 	return &Driver{}
 }
 
-func (d *Driver) Storage() core.Storage {
-	config := getConfig()
+func (d *Driver) Storage() (core.Storage, error) {
+	conf := getConfig()
 
-	if config.Bucket == "" || config.AccessKey == "" || config.SecretKey == "" {
-		panic("配置不正确")
+	if conf.Bucket == "" || conf.AccessKey == "" || conf.SecretKey == "" {
+		return nil, core.ErrorConfigEmpty
 	}
 
-	mac := qbox.NewMac(config.AccessKey, config.SecretKey)
+	mac := qbox.NewMac(conf.AccessKey, conf.SecretKey)
 	cfg := storage.Config{
 		UseHTTPS: true,
 	}
 
 	store := Store{
-		config:        *config,
+		config:        *conf,
 		bucketManager: storage.NewBucketManager(mac, &cfg),
 	}
 
-	return &Storage{store: store}
+	return &Storage{store: store}, nil
 }
 
 func (d Driver) Name() string {

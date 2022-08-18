@@ -51,16 +51,16 @@ var putCmd = &cobra.Command{
 
 		exist, err := app.Storage.Exists(putCmdArgs.Key)
 		if err != nil {
-			log.Fatalf("Exists err: %#v", err)
+			log.Fatal(err)
 		}
 
 		if exist && !putCmdArgs.Force {
 			log.Fatalf("文件已存在，需要覆盖请使用 -f 参数强制覆盖原有文件")
 		}
 
-		err = app.Storage.Put(putCmdArgs.Key, putCmdArgs.Path)
+		err = app.Storage.PutFromFile(putCmdArgs.Key, putCmdArgs.Path)
 		if err != nil {
-			log.Fatalf("put err: %#v", err)
+			log.Fatal(err)
 		}
 
 		color.Green(fmt.Sprintf("上传成功！\"%s\" -> \"%s\"", putCmdArgs.Path, putCmdArgs.Key))

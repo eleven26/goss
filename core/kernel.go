@@ -21,10 +21,22 @@ func New() Kernel {
 	return app
 }
 
-func (a *Kernel) UseDriver(driver Driver) {
-	a.Storage = a.storages.Get(strings.ToLower(driver.Name()))
+func (a *Kernel) UseDriver(driver Driver) error {
+	storage, err := a.storages.Get(strings.ToLower(driver.Name()))
+	if err != nil {
+		return err
+	}
+
+	a.Storage = storage
+
+	return nil
 }
 
-func (a *Kernel) RegisterDriver(driver Driver) {
-	a.storages.Register(driver.Name(), driver.Storage())
+func (a *Kernel) RegisterDriver(driver Driver) error {
+	storage, err := driver.Storage()
+	if err != nil {
+		return err
+	}
+
+	return a.storages.Register(driver.Name(), storage)
 }

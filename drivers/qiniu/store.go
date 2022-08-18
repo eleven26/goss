@@ -1,9 +1,9 @@
 package qiniu
 
 import (
+	"bytes"
 	"context"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"time"
@@ -18,21 +18,48 @@ type Store struct {
 	bucketManager *storage.BucketManager
 }
 
-func (s *Store) put(key string, localPath string) (*storage.PutRet, error) {
+func (s *Store) put(key string, r io.Reader) (*storage.PutRet, error) {
+	upToken := s.upToken()
+	formUploader := s.uploader()
+	ret := storage.PutRet{}
+
+	buf := new(bytes.Buffer)
+	size, err := io.Copy(buf, r)
+	if err != nil {
+		return nil, err
+	}
+
+	err = formUploader.Put(context.Background(), &ret, upToken, key, buf, size, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return &ret, nil
+}
+
+func (s *Store) upToken() string {
 	putPolicy := storage.PutPolicy{
 		Scope: s.config.Bucket,
 	}
 
 	mac := qbox.NewMac(s.config.AccessKey, s.config.SecretKey)
 
-	upToken := putPolicy.UploadToken(mac)
+	return putPolicy.UploadToken(mac)
+}
+
+func (s *Store) uploader() *storage.FormUploader {
 	cfg := storage.Config{}
 	// 是否使用https域名
 	cfg.UseHTTPS = true
 	// 上传是否使用CDN上传加速
 	cfg.UseCdnDomains = false
 	// 构建表单上传的对象
-	formUploader := storage.NewFormUploader(&cfg)
+	return storage.NewFormUploader(&cfg)
+}
+
+func (s *Store) putFromFile(key string, localPath string) (*storage.PutRet, error) {
+	upToken := s.upToken()
+	formUploader := s.uploader()
 	ret := storage.PutRet{}
 
 	err := formUploader.PutFile(context.Background(), &ret, upToken, key, localPath, nil)
@@ -57,16 +84,13 @@ func (s *Store) getDownloadUrl(key string) string {
 	return url
 }
 
-func (s *Store) getUrlContent(url string) ([]byte, error) {
+func (s *Store) getUrlContent(url string) (io.ReadCloser, error) {
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
 	}
-	defer func(Body io.ReadCloser) {
-		err = Body.Close()
-	}(resp.Body)
 
-	return ioutil.ReadAll(resp.Body)
+	return resp.Body, nil
 }
 
 func (s *Store) Stat(key string) (fileInfo storage.FileInfo, err error) {
@@ -75,10 +99,14 @@ func (s *Store) Stat(key string) (fileInfo storage.FileInfo, err error) {
 
 func (s *Store) SaveToFile(key string, localPath string) error {
 	url := s.getDownloadUrl(key)
-	bs, err := s.getUrlContent(url)
+	rc, err := s.getUrlContent(url)
 	if err != nil {
 		return err
 	}
+
+	defer func(rc io.ReadCloser) {
+		err = rc.Close()
+	}(rc)
 
 	// 保存到文件 localPath
 	f, _ := os.OpenFile(localPath, os.O_CREATE|os.O_WRONLY, 0o644)
@@ -86,7 +114,7 @@ func (s *Store) SaveToFile(key string, localPath string) error {
 		err = f.Close()
 	}(f)
 
-	_, err = f.Write(bs)
+	_, err = io.Copy(f, rc)
 
 	return err
 }

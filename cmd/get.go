@@ -43,7 +43,7 @@ var getCmd = &cobra.Command{
 
 		err := app.Storage.Save(getCmdArgs.Key, getCmdArgs.Target)
 		if err != nil {
-			log.Fatalf("get err: %#v", err)
+			log.Fatal(err)
 		}
 
 		color.Green(fmt.Sprintf("下载成功！保存路径：\"%s\"", getCmdArgs.Target))

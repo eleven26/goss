@@ -8,8 +8,8 @@ import (
 
 type DriverStub struct{}
 
-func (d DriverStub) Storage() Storage {
-	return &StorageStub{}
+func (d DriverStub) Storage() (Storage, error) {
+	return &StorageStub{}, nil
 }
 
 func (d DriverStub) Name() string {
@@ -32,10 +32,17 @@ func TestUseDriver(t *testing.T) {
 	}
 
 	driver := DriverStub{}
-	kernel.storages.storages["stub"] = driver.Storage()
-	kernel.UseDriver(driver)
+	storage, err := driver.Storage()
+	if err != nil {
+		t.Fatal(err)
+	}
+	kernel.storages.storages["stub"] = storage
+	err = kernel.UseDriver(driver)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	assert.Equal(t, kernel.Storage, driver.Storage())
+	assert.Equal(t, kernel.Storage, storage)
 }
 
 func TestRegisterDriver(t *testing.T) {
@@ -46,11 +53,21 @@ func TestRegisterDriver(t *testing.T) {
 	}
 
 	driver := DriverStub{}
-	kernel.RegisterDriver(&driver)
+	err := kernel.RegisterDriver(&driver)
+	assert.Nil(t, err)
+
+	storage, err := driver.Storage()
+	assert.Nil(t, err)
 
 	assert.Len(t, kernel.storages.storages, 1)
-	assert.Equal(t, kernel.storages.Get(driver.Name()), driver.Storage())
 
-	kernel.UseDriver(driver)
-	assert.Equal(t, kernel.Storage, driver.Storage())
+	s, err := kernel.storages.Get(driver.Name())
+	assert.Nil(t, err)
+	assert.Equal(t, s, storage)
+
+	err = kernel.UseDriver(driver)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assert.Equal(t, kernel.Storage, storage)
 }

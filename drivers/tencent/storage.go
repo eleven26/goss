@@ -19,8 +19,8 @@ type Storage struct {
 	store Store
 }
 
-func (s *Storage) Put(key string, localPath string) error {
-	response, err := s.store.Put(key, localPath)
+func (s *Storage) Put(key string, r io.Reader) error {
+	response, err := s.store.Put(key, r)
 	if err != nil {
 		return err
 	}
@@ -32,17 +32,30 @@ func (s *Storage) Put(key string, localPath string) error {
 	return nil
 }
 
-func (s *Storage) Get(key string) (content string, err error) {
+func (s *Storage) PutFromFile(key string, localPath string) error {
+	response, err := s.store.PutFromFile(key, localPath)
+	if err != nil {
+		return err
+	}
+
+	if response.StatusCode != http.StatusOK {
+		return httpError(response)
+	}
+
+	return nil
+}
+
+func (s *Storage) Get(key string) (rc io.ReadCloser, err error) {
 	resp, err := s.store.Get(key)
 	if err != nil {
 		return
 	}
 
-	defer func() {
-		err = resp.Body.Close()
-	}()
+	return resp.Body, nil
+}
 
-	bs, err := ioutil.ReadAll(resp.Body)
+func (s *Storage) GetString(key string) (content string, err error) {
+	bs, err := s.GetBytes(key)
 	if err != nil {
 		return
 	}
@@ -50,6 +63,19 @@ func (s *Storage) Get(key string) (content string, err error) {
 	content = string(bs)
 
 	return
+}
+
+func (s *Storage) GetBytes(key string) (bs []byte, err error) {
+	rc, err := s.Get(key)
+	if err != nil {
+		return
+	}
+
+	defer func() {
+		err = rc.Close()
+	}()
+
+	return ioutil.ReadAll(rc)
 }
 
 func (s *Storage) Save(key string, localPath string) (err error) {

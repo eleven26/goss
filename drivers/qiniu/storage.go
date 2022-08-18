@@ -1,6 +1,9 @@
 package qiniu
 
 import (
+	"io"
+	"io/ioutil"
+
 	"github.com/eleven26/goss/core"
 )
 
@@ -8,21 +11,44 @@ type Storage struct {
 	store Store
 }
 
-func (s *Storage) Put(key string, localPath string) error {
-	_, err := s.store.put(key, localPath)
+func (s *Storage) Put(key string, r io.Reader) error {
+	_, err := s.store.put(key, r)
 
 	return err
 }
 
-func (s *Storage) Get(key string) (string, error) {
+func (s *Storage) PutFromFile(key string, localPath string) error {
+	_, err := s.store.putFromFile(key, localPath)
+
+	return err
+}
+
+func (s *Storage) Get(key string) (io.ReadCloser, error) {
 	url := s.store.getDownloadUrl(key)
 
-	bs, err := s.store.getUrlContent(url)
+	return s.store.getUrlContent(url)
+}
+
+func (s *Storage) GetString(key string) (string, error) {
+	bs, err := s.GetBytes(key)
 	if err != nil {
 		return "", err
 	}
 
 	return string(bs), nil
+}
+
+func (s *Storage) GetBytes(key string) ([]byte, error) {
+	rc, err := s.Get(key)
+	if err != nil {
+		return nil, err
+	}
+
+	defer func(rc io.ReadCloser) {
+		err = rc.Close()
+	}(rc)
+
+	return ioutil.ReadAll(rc)
 }
 
 func (s *Storage) Delete(key string) error {

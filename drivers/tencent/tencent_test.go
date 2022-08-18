@@ -4,7 +4,11 @@ package tencent
 
 import (
 	"context"
+	"io"
+	"io/ioutil"
+	"log"
 	"net/http"
+	"os"
 	"path/filepath"
 	"reflect"
 	"testing"
@@ -17,8 +21,6 @@ import (
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/tencentyun/cos-go-sdk-v5"
-
-	_ "github.com/eleven26/goss/config"
 )
 
 var (
@@ -33,10 +35,16 @@ var (
 )
 
 func init() {
-	config2.ReadInUserHomeConfig()
+	err := config2.ReadInUserHomeConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	d := NewDriver()
-	storage = d.Storage()
+	storage, err = d.Storage()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	object = storage.(*Storage).store.client.Object
 
@@ -47,36 +55,55 @@ func init() {
 	viper.Set("show_progress_bar", false)
 }
 
-func setUp() {
+func setUp(t *testing.T) {
 	_, err := object.PutFromFile(context.Background(), key, fooPath, nil)
 	if err != nil {
-		panic(err)
+		t.Fatal(err)
 	}
 }
 
-func tearDown() {
-	deleteLocal()
-	deleteRemote()
+func tearDown(t *testing.T) {
+	deleteLocal(t)
+	deleteRemote(t)
 }
 
-func deleteRemote() {
+func deleteRemote(t *testing.T) {
 	_, err := object.Delete(context.Background(), key)
 	if err != nil {
-		panic(err)
+		t.Fatal(err)
 	}
 }
 
-func deleteLocal() {
+func deleteLocal(t *testing.T) {
 	exists, _ := fs.Exists(localFooPath)
 	if exists {
-		_ = fs.Delete(localFooPath)
+		err := fs.Delete(localFooPath)
+		if err != nil {
+			t.Fatal(err)
+		}
 	}
 }
 
 func TestPut(t *testing.T) {
-	defer tearDown()
+	defer tearDown(t)
 
-	err := storage.Put(key, fooPath)
+	f, err := os.Open(fooPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = storage.Put(key, f)
+	assert.Nil(t, err)
+
+	exists, err := object.IsExist(context.Background(), key)
+	assert.Nil(t, err)
+	assert.True(t, exists)
+}
+
+func TestPutFromFile(t *testing.T) {
+	defer tearDown(t)
+
+	err := storage.PutFromFile(key, fooPath)
 	assert.Nil(t, err)
 
 	exists, err := object.IsExist(context.Background(), key)
@@ -85,21 +112,56 @@ func TestPut(t *testing.T) {
 }
 
 func TestGet(t *testing.T) {
-	setUp()
-	defer tearDown()
+	setUp(t)
+	defer tearDown(t)
 
-	content, err := storage.Get(key)
+	rc, err := storage.Get(key)
+	defer func(rc io.ReadCloser) {
+		err = rc.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}(rc)
+	assert.Nil(t, err)
+
+	bs, err := ioutil.ReadAll(rc)
+	assert.Nil(t, err)
+	assert.Equal(t, string(bs), "foo")
+
+	rc, err = storage.Get(key + "not_exists")
+	assert.Empty(t, rc)
+	assert.Equal(t, http.StatusNotFound, err.(*cos.ErrorResponse).Response.StatusCode)
+}
+
+func TestGetString(t *testing.T) {
+	setUp(t)
+	defer tearDown(t)
+
+	content, err := storage.GetString(key)
 	assert.Nil(t, err)
 	assert.Equal(t, content, "foo")
 
-	content, err = storage.Get(key + "not_exists")
+	content, err = storage.GetString(key + "not_exists")
 	assert.Empty(t, content)
 	assert.Equal(t, http.StatusNotFound, err.(*cos.ErrorResponse).Response.StatusCode)
 }
 
+func TestGetBytes(t *testing.T) {
+	setUp(t)
+	defer tearDown(t)
+
+	bs, err := storage.GetBytes(key)
+	assert.Nil(t, err)
+	assert.Equal(t, string(bs), "foo")
+
+	bs, err = storage.GetBytes(key + "not_exists")
+	assert.Nil(t, bs)
+	assert.Equal(t, http.StatusNotFound, err.(*cos.ErrorResponse).Response.StatusCode)
+}
+
 func TestSave(t *testing.T) {
-	setUp()
-	defer tearDown()
+	setUp(t)
+	defer tearDown(t)
 
 	err := storage.Save(key, localFooPath)
 	assert.Nil(t, err)
@@ -107,8 +169,8 @@ func TestSave(t *testing.T) {
 }
 
 func TestSize(t *testing.T) {
-	setUp()
-	defer tearDown()
+	setUp(t)
+	defer tearDown(t)
 
 	size, err := storage.Size(key)
 
@@ -124,7 +186,7 @@ func TestSize(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
-	setUp()
+	setUp(t)
 
 	err := storage.Delete(key)
 	assert.Nil(t, err)
@@ -135,8 +197,8 @@ func TestDelete(t *testing.T) {
 }
 
 func TestExists(t *testing.T) {
-	setUp()
-	defer tearDown()
+	setUp(t)
+	defer tearDown(t)
 
 	exists, err := storage.Exists(key)
 	assert.Nil(t, err)
@@ -144,8 +206,8 @@ func TestExists(t *testing.T) {
 }
 
 func TestFiles(t *testing.T) {
-	setUp()
-	defer tearDown()
+	setUp(t)
+	defer tearDown(t)
 
 	files, err := storage.Files("test/")
 	assert.Nil(t, err)

@@ -16,12 +16,29 @@ type Storage struct {
 	store Store
 }
 
-func (s *Storage) Put(key string, localPath string) error {
-	return s.store.Put(key, localPath)
+func (s *Storage) Put(key string, r io.Reader) error {
+	return s.store.Put(key, r)
 }
 
-func (s *Storage) Get(key string) (content string, err error) {
-	rc, err := s.store.Get(key)
+func (s *Storage) PutFromFile(key string, localPath string) error {
+	return s.store.PutFromFile(key, localPath)
+}
+
+func (s *Storage) Get(key string) (reader io.ReadCloser, err error) {
+	return s.store.Get(key)
+}
+
+func (s *Storage) GetString(key string) (string, error) {
+	bs, err := s.GetBytes(key)
+	if err != nil {
+		return "", err
+	}
+
+	return string(bs), nil
+}
+
+func (s *Storage) GetBytes(key string) (bytes []byte, err error) {
+	rc, err := s.Get(key)
 	if err != nil {
 		return
 	}
@@ -30,14 +47,7 @@ func (s *Storage) Get(key string) (content string, err error) {
 		err = rc.Close()
 	}()
 
-	bs, err := ioutil.ReadAll(rc)
-	if err != nil {
-		return
-	}
-
-	content = string(bs)
-
-	return
+	return ioutil.ReadAll(rc)
 }
 
 func (s *Storage) Save(key string, localPath string) (err error) {

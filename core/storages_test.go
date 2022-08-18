@@ -1,6 +1,7 @@
 package core
 
 import (
+	"io"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -8,11 +9,23 @@ import (
 
 type StorageStub struct{}
 
-func (s StorageStub) Put(key string, localPath string) error {
+func (s StorageStub) Put(key string, r io.Reader) error {
 	panic("implement me")
 }
 
-func (s StorageStub) Get(key string) (string, error) {
+func (s StorageStub) PutFromFile(key string, localPath string) error {
+	panic("implement me")
+}
+
+func (s StorageStub) Get(key string) (io.ReadCloser, error) {
+	panic("implement me")
+}
+
+func (s StorageStub) GetString(key string) (string, error) {
+	panic("implement me")
+}
+
+func (s StorageStub) GetBytes(key string) ([]byte, error) {
 	panic("implement me")
 }
 
@@ -45,7 +58,8 @@ func TestRegister(t *testing.T) {
 
 	assert.Nil(t, storages.storages)
 	stub := StorageStub{}
-	storages.Register("test", stub)
+	err := storages.Register("test", stub)
+	assert.Nil(t, err)
 	assert.NotNil(t, storages.storages)
 
 	assert.Len(t, storages.storages, 1)
@@ -54,27 +68,31 @@ func TestRegister(t *testing.T) {
 	assert.True(t, ok)
 	assert.Equal(t, s, stub)
 
-	assert.Panics(t, func() {
-		storages.Register("test", stub)
-	})
+	err = storages.Register("test", stub)
+	assert.NotNil(t, err)
+	assert.ErrorIs(t, err, errExistsDriver)
 
-	storages.Register("test1", StorageStub{})
+	err = storages.Register("test1", StorageStub{})
+	assert.Nil(t, err)
 	assert.Len(t, storages.storages, 2)
 }
 
 func TestGet(t *testing.T) {
 	storages := Storages{}
 
-	assert.Panics(t, func() {
-		storages.Get("test")
-	})
+	s, err := storages.Get("test")
+	assert.Nil(t, s)
+	assert.NotNil(t, err)
 
 	stub := StorageStub{}
 	storages.storages = make(map[string]Storage)
 	storages.storages["test"] = stub
-	assert.Panics(t, func() {
-		storages.Get("not exists")
-	})
 
-	assert.Equal(t, stub, storages.Get("test"))
+	s, err = storages.Get("not exists")
+	assert.Nil(t, s)
+	assert.NotNil(t, err)
+
+	s, err = storages.Get("test")
+	assert.Nil(t, err)
+	assert.Equal(t, stub, s)
 }

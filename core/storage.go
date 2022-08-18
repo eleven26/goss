@@ -1,10 +1,20 @@
 package core
 
+import "io"
+
 type Storage interface {
-	// Put 将本地路径 localPath 指向的文件保存到 oss 的 key
-	Put(key string, localPath string) error
+	// Put 将从 r 读取的内容保存到 oss 的 key
+	Put(key string, r io.Reader) error
+	// PutFromFile 将本地路径 localPath 指向的文件保存到 oss 的 key
+	PutFromFile(key string, localPath string) error
+
 	// Get 获取 key 指向的文件
-	Get(key string) (string, error)
+	Get(key string) (io.ReadCloser, error)
+	// GetString 获取 key 指向的文件，返回字符串
+	GetString(key string) (string, error)
+	// GetBytes 获取 key 指向的文件，返回字节数组
+	GetBytes(key string) ([]byte, error)
+
 	// Delete 删除 key 指向的文件
 	Delete(key string) error
 	// Save 保存 key 指向的文件到本地 localPath
@@ -15,6 +25,7 @@ type Storage interface {
 	Files(dir string) ([]File, error)
 	// Size 获取文件大小
 	Size(key string) (int64, error)
+
 	// Storage 获取底层的结构体
 	Storage() interface{}
 }

@@ -14,23 +14,23 @@ func NewDriver() core.Driver {
 	return &Driver{}
 }
 
-func (d *Driver) Storage() core.Storage {
-	config := getConfig()
+func (d *Driver) Storage() (core.Storage, error) {
+	conf := getConfig()
 
-	if config.Url == "" || config.SecretId == "" || config.SecretKey == "" {
-		panic("配置不正确")
+	if conf.Url == "" || conf.SecretId == "" || conf.SecretKey == "" {
+		return nil, core.ErrorConfigEmpty
 	}
 
-	u, err := url.Parse(config.Url)
+	u, err := url.Parse(conf.Url)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	b := &cos.BaseURL{BucketURL: u}
 	client := cos.NewClient(b, &http.Client{
 		Transport: &cos.AuthorizationTransport{
-			SecretID:  config.SecretId,
-			SecretKey: config.SecretKey,
+			SecretID:  conf.SecretId,
+			SecretKey: conf.SecretKey,
 		},
 	})
 
@@ -38,7 +38,7 @@ func (d *Driver) Storage() core.Storage {
 		client: client,
 	}
 
-	return &Storage{store: store}
+	return &Storage{store: store}, nil
 }
 
 func (d Driver) Name() string {

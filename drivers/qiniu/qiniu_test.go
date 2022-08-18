@@ -3,6 +3,9 @@
 package qiniu
 
 import (
+	"io/ioutil"
+	"log"
+	"os"
 	"path/filepath"
 	"testing"
 	"time"
@@ -28,10 +31,16 @@ var (
 )
 
 func init() {
-	config2.ReadInUserHomeConfig()
+	err := config2.ReadInUserHomeConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	d := NewDriver()
-	storage2 = d.Storage()
+	storage2, err = d.Storage()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	store = storage2.(*Storage).store
 
@@ -42,53 +51,101 @@ func init() {
 	viper.Set("show_progress_bar", false)
 }
 
-func setUp() {
-	err := storage2.Put(key, fooPath)
+func setUp(t *testing.T) {
+	err := storage2.PutFromFile(key, fooPath)
 	if err != nil {
-		panic(err)
+		t.Fatal(err)
 	}
 }
 
-func tearDown() {
-	deleteLocal()
-	deleteRemote()
+func tearDown(t *testing.T) {
+	deleteLocal(t)
+	deleteRemote(t)
 }
 
-func deleteRemote() {
+func deleteRemote(t *testing.T) {
 	err := store.bucketManager.Delete(store.config.Bucket, key)
 	if err != nil {
-		panic(err)
+		t.Fatal(err)
 	}
 }
 
-func deleteLocal() {
+func deleteLocal(t *testing.T) {
 	exists, _ := fs.Exists(localFooPath)
 	if exists {
-		_ = fs.Delete(localFooPath)
+		err := fs.Delete(localFooPath)
+		if err != nil {
+			t.Fatal(err)
+		}
 	}
 }
 
 func TestPut(t *testing.T) {
-	defer tearDown()
+	defer tearDown(t)
 
-	err := storage2.Put(key, fooPath)
+	f, err := os.Open(fooPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func(f *os.File) {
+		err = f.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}(f)
 
+	err = storage2.Put(key, f)
+	assert.Nil(t, err)
+
+	_, err = store.bucketManager.Stat(store.config.Bucket, key)
+	assert.Nil(t, err)
+}
+
+func TestPutFromFile(t *testing.T) {
+	defer tearDown(t)
+
+	err := storage2.PutFromFile(key, fooPath)
+	assert.Nil(t, err)
+
+	_, err = store.bucketManager.Stat(store.config.Bucket, key)
 	assert.Nil(t, err)
 }
 
 func TestGet(t *testing.T) {
-	setUp()
-	defer tearDown()
+	setUp(t)
+	defer tearDown(t)
 
-	content, err := storage2.Get(key)
+	rc, err := storage2.Get(key)
+	assert.Nil(t, err)
+
+	bs, err := ioutil.ReadAll(rc)
+	assert.Nil(t, err)
+	assert.Equal(t, "foo", string(bs))
+}
+
+func TestGetString(t *testing.T) {
+	setUp(t)
+	defer tearDown(t)
+
+	content, err := storage2.GetString(key)
 
 	assert.Nil(t, err)
 	assert.Equal(t, "foo", content)
 }
 
+func TestGetBytes(t *testing.T) {
+	setUp(t)
+	defer tearDown(t)
+
+	bs, err := storage2.GetBytes(key)
+
+	assert.Nil(t, err)
+	assert.Equal(t, "foo", string(bs))
+}
+
 func TestDelete(t *testing.T) {
-	setUp()
-	defer deleteLocal()
+	setUp(t)
+	defer deleteLocal(t)
 
 	err := storage2.Delete(key)
 	assert.Nil(t, err)
@@ -98,8 +155,8 @@ func TestDelete(t *testing.T) {
 }
 
 func TestSave(t *testing.T) {
-	setUp()
-	defer tearDown()
+	setUp(t)
+	defer tearDown(t)
 
 	err := storage2.Save(key, localFooPath)
 	assert.Nil(t, err)
@@ -107,8 +164,8 @@ func TestSave(t *testing.T) {
 }
 
 func TestExists(t *testing.T) {
-	setUp()
-	defer tearDown()
+	setUp(t)
+	defer tearDown(t)
 
 	exists, err := storage2.Exists(key)
 
@@ -122,8 +179,8 @@ func TestExists(t *testing.T) {
 }
 
 func TestFiles(t *testing.T) {
-	setUp()
-	defer tearDown()
+	setUp(t)
+	defer tearDown(t)
 
 	files, err := storage2.Files("test/")
 	assert.Nil(t, err)
@@ -138,8 +195,8 @@ func TestFiles(t *testing.T) {
 }
 
 func TestSize(t *testing.T) {
-	setUp()
-	defer tearDown()
+	setUp(t)
+	defer tearDown(t)
 
 	size, err := storage2.Size(key)
 

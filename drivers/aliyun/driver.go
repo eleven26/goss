@@ -11,28 +11,28 @@ func NewDriver() core.Driver {
 	return &Driver{}
 }
 
-func (d *Driver) Storage() core.Storage {
-	config := getConfig()
+func (d *Driver) Storage() (core.Storage, error) {
+	conf := getConfig()
 
-	if config.Endpoint == "" || config.AccessKeyID == "" || config.AccessKeySecret == "" {
-		panic("配置不正确")
+	if conf.Endpoint == "" || conf.AccessKeyID == "" || conf.AccessKeySecret == "" {
+		return nil, core.ErrorConfigEmpty
 	}
 
-	client, err := oss.New(config.Endpoint, config.AccessKeyID, config.AccessKeySecret)
+	client, err := oss.New(conf.Endpoint, conf.AccessKeyID, conf.AccessKeySecret)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	bucket, err := client.Bucket(config.Bucket)
+	bucket, err := client.Bucket(conf.Bucket)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	store := Store{
 		Bucket: bucket,
 	}
 
-	return &Storage{store: store}
+	return &Storage{store: store}, nil
 }
 
 func (d Driver) Name() string {

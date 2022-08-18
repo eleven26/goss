@@ -40,7 +40,7 @@ var listCmd = &cobra.Command{
 
 		files, err := app.Storage.Files(listCmdArgs.Prefix)
 		if err != nil {
-			log.Fatalf("list err: %#v", err)
+			log.Fatal(err)
 		}
 
 		fmt.Printf("%9s %19s %s\n", "Size", "LastModified", "Key")

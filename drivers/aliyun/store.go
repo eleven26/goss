@@ -13,7 +13,11 @@ type Store struct {
 	Bucket *oss.Bucket
 }
 
-func (s *Store) Put(key string, localPath string) error {
+func (s *Store) Put(key string, r io.Reader) error {
+	return s.Bucket.PutObject(key, r)
+}
+
+func (s *Store) PutFromFile(key string, localPath string) error {
 	return s.Bucket.PutObjectFromFile(key, localPath)
 }
 
