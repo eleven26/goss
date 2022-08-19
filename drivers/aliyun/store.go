@@ -41,9 +41,13 @@ func (s *Store) Exists(key string) (bool, error) {
 	return s.Bucket.IsObjectExist(key)
 }
 
+func (s Store) ListObjects(marker oss.Option) (oss.ListObjectsResult, error) {
+	return s.Bucket.ListObjects(marker)
+}
+
 func (s *Store) Iterator(dir string) core.FileIterator {
 	chunk := func(marker oss.Option) (oss.ListObjectsResult, error) {
-		return s.Bucket.ListObjects(marker)
+		return s.ListObjects(marker)
 	}
 
 	it := newFileIterator(dir, chunk)

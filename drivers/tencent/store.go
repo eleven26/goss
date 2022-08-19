@@ -42,9 +42,13 @@ func (s *Store) Exists(key string) (bool, error) {
 	return s.client.Object.IsExist(context.Background(), key)
 }
 
+func (s Store) GetWithOpt(opt *cos.BucketGetOptions) (*cos.BucketGetResult, *cos.Response, error) {
+	return s.client.Bucket.Get(context.Background(), opt)
+}
+
 func (s *Store) Iterator(dir string) core.FileIterator {
 	chunk := func(opt *cos.BucketGetOptions) (*cos.BucketGetResult, *cos.Response, error) {
-		return s.client.Bucket.Get(context.Background(), opt)
+		return s.GetWithOpt(opt)
 	}
 
 	it := newFileIterator(dir)
