@@ -6,7 +6,7 @@ retract v1.0.0
 
 require (
 	github.com/aliyun/aliyun-oss-go-sdk v2.2.4+incompatible
-	github.com/eleven26/go-filesystem v0.0.0-20220810082038-aa849c0db503
+	github.com/eleven26/go-filesystem v1.0.0
 	github.com/qiniu/go-sdk/v7 v7.13.0
 	github.com/schollz/progressbar/v3 v3.9.0
 	github.com/spf13/viper v1.12.0
@@ -26,6 +26,7 @@ require (
 	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/mozillazg/go-httpheader v0.3.1 // indirect
+	github.com/otiai10/copy v1.7.0 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
