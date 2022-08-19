@@ -1,15 +1,11 @@
 package aliyun
 
 import (
-	"fmt"
 	"io"
 	"io/ioutil"
-	"os"
 	"strconv"
 
 	"github.com/eleven26/goss/core"
-	"github.com/schollz/progressbar/v3"
-	"github.com/spf13/viper"
 )
 
 type Storage struct {
@@ -51,42 +47,7 @@ func (s *Storage) GetBytes(key string) (bytes []byte, err error) {
 }
 
 func (s *Storage) GetToFile(key string, localPath string) (err error) {
-	if !viper.GetBool("show_progress_bar") {
-		return s.store.SaveToFile(key, localPath)
-	}
-
-	return s.saveWithProgress(key, localPath)
-}
-
-func (s Storage) saveWithProgress(key string, localPath string) (err error) {
-	rc, err := s.store.Get(key)
-	if err != nil {
-		return
-	}
-
-	defer func() {
-		err = rc.Close()
-	}()
-
-	// 获取文件长度
-	length, err := s.Size(key)
-	if err != nil {
-		return
-	}
-
-	// 保存到文件 localPath
-	f, _ := os.OpenFile(localPath, os.O_CREATE|os.O_WRONLY, 0o644)
-	defer func(f *os.File) {
-		err = f.Close()
-	}(f)
-
-	// 初始化进度条
-	bar := progressbar.DefaultBytes(length, fmt.Sprintf("\"%s\" -> \"%s\"", key, localPath))
-
-	// io.MultiWriter 同时输出到文件和进度条
-	_, err = io.Copy(io.MultiWriter(f, bar), rc)
-
-	return
+	return s.store.SaveToFile(key, localPath)
 }
 
 func (s *Storage) Size(key string) (int64, error) {

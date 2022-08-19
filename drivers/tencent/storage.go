@@ -2,16 +2,12 @@ package tencent
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"strconv"
 
 	"github.com/eleven26/goss/core"
-	"github.com/schollz/progressbar/v3"
-	"github.com/spf13/viper"
 	"github.com/tencentyun/cos-go-sdk-v5"
 )
 
@@ -79,14 +75,6 @@ func (s *Storage) GetBytes(key string) (bs []byte, err error) {
 }
 
 func (s *Storage) GetToFile(key string, localPath string) (err error) {
-	if !viper.GetBool("show_progress_bar") {
-		return s.saveWithoutProgress(key, localPath)
-	}
-
-	return s.saveWithProgress(key, localPath)
-}
-
-func (s *Storage) saveWithoutProgress(key string, localPath string) (err error) {
 	resp, err := s.store.SaveToFile(key, localPath)
 	if err != nil {
 		return err
@@ -97,37 +85,6 @@ func (s *Storage) saveWithoutProgress(key string, localPath string) (err error) 
 	}
 
 	return nil
-}
-
-func (s Storage) saveWithProgress(key string, localPath string) (err error) {
-	resp, err := s.store.Get(key)
-	if err != nil {
-		return
-	}
-
-	defer func() {
-		err = resp.Body.Close()
-	}()
-
-	// 获取文件长度
-	length, err := s.Size(key)
-	if err != nil {
-		return
-	}
-
-	// 保存到文件 localPath
-	f, _ := os.OpenFile(localPath, os.O_CREATE|os.O_WRONLY, 0o644)
-	defer func(f *os.File) {
-		err = f.Close()
-	}(f)
-
-	// 初始化进度条
-	bar := progressbar.DefaultBytes(length, fmt.Sprintf("\"%s\" -> \"%s\"", key, localPath))
-
-	// io.MultiWriter 同时输出到文件和进度条
-	_, err = io.Copy(io.MultiWriter(f, bar), resp.Body)
-
-	return
 }
 
 func (s *Storage) Size(key string) (int64, error) {
