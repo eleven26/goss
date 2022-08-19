@@ -15,7 +15,6 @@ import (
 	"github.com/eleven26/goss/utils"
 
 	fs "github.com/eleven26/go-filesystem"
-	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -47,8 +46,6 @@ func init() {
 	testdata = filepath.Join(utils.RootDir(), "testdata")
 	fooPath = filepath.Join(testdata, "foo.txt")
 	localFooPath = filepath.Join(testdata, "foo1.txt")
-
-	viper.Set("show_progress_bar", false)
 }
 
 func setUp(t *testing.T) {

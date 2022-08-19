@@ -7,6 +7,7 @@ retract v1.0.0
 require (
 	github.com/aliyun/aliyun-oss-go-sdk v2.2.4+incompatible
 	github.com/eleven26/go-filesystem v1.0.0
+	github.com/huaweicloud/huaweicloud-sdk-go-obs v3.21.12+incompatible
 	github.com/qiniu/go-sdk/v7 v7.13.0
 	github.com/spf13/viper v1.12.0
 	github.com/stretchr/testify v1.8.0
