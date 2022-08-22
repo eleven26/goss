@@ -45,11 +45,11 @@ func (s StorageStub) Files(dir string) ([]File, error) {
 	panic("implement me")
 }
 
-func (s StorageStub) Storage() interface{} {
+func (s StorageStub) Size(key string) (int64, error) {
 	panic("implement me")
 }
 
-func (s StorageStub) Size(key string) (int64, error) {
+func (s StorageStub) Store() interface{} {
 	panic("implement me")
 }
 

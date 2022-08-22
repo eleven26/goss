@@ -1,31 +1,31 @@
 package huawei
 
-import "time"
+import (
+	"time"
+
+	"github.com/huaweicloud/huaweicloud-sdk-go-obs/obs"
+)
 
 type File struct {
-	key          string
-	typ          string
-	size         int64
-	eTag         string
-	lastModified time.Time
+	content obs.Content
 }
 
 func (f *File) Key() string {
-	return f.key
+	return f.content.Key
 }
 
 func (f *File) Type() string {
-	return f.typ
+	return ""
 }
 
 func (f *File) Size() int64 {
-	return f.size
+	return f.content.Size
 }
 
 func (f *File) ETag() string {
-	return f.eTag
+	return f.content.ETag
 }
 
 func (f *File) LastModified() time.Time {
-	return f.lastModified
+	return f.content.LastModified
 }

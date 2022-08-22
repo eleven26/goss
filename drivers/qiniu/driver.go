@@ -29,7 +29,7 @@ func (d *Driver) Storage() (core.Storage, error) {
 		bucketManager: storage.NewBucketManager(mac, &cfg),
 	}
 
-	return &Storage{store: store}, nil
+	return core.NewStorage(&store), nil
 }
 
 func (d Driver) Name() string {

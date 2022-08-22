@@ -9,9 +9,3 @@ type File interface {
 	ETag() string
 	LastModified() time.Time
 }
-
-type FileIterator interface {
-	HasNext() bool
-	Next() (File, error)
-	All() ([]File, error)
-}

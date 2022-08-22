@@ -12,6 +12,19 @@ func NewDriver() core.Driver {
 }
 
 func (d *Driver) Storage() (core.Storage, error) {
+	bucket, err := ossBucket()
+	if err != nil {
+		return nil, err
+	}
+
+	store := Store{
+		Bucket: bucket,
+	}
+
+	return core.NewStorage(&store), nil
+}
+
+func ossBucket() (*oss.Bucket, error) {
 	conf := getConfig()
 
 	if conf.Endpoint == "" || conf.AccessKeyID == "" || conf.AccessKeySecret == "" {
@@ -23,16 +36,7 @@ func (d *Driver) Storage() (core.Storage, error) {
 		return nil, err
 	}
 
-	bucket, err := client.Bucket(conf.Bucket)
-	if err != nil {
-		return nil, err
-	}
-
-	store := Store{
-		Bucket: bucket,
-	}
-
-	return &Storage{store: store}, nil
+	return client.Bucket(conf.Bucket)
 }
 
 func (d Driver) Name() string {

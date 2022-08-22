@@ -1,31 +1,33 @@
 package tencent
 
-import "time"
+import (
+	"time"
+
+	"github.com/tencentyun/cos-go-sdk-v5"
+)
 
 type File struct {
-	key          string
-	typ          string
-	size         int64
-	eTag         string
-	lastModified time.Time
+	object cos.Object
 }
 
 func (f *File) Key() string {
-	return f.key
+	return f.object.Key
 }
 
 func (f *File) Type() string {
-	return f.typ
+	return ""
 }
 
 func (f *File) Size() int64 {
-	return f.size
+	return f.object.Size
 }
 
 func (f *File) ETag() string {
-	return f.eTag
+	return f.object.ETag
 }
 
 func (f *File) LastModified() time.Time {
-	return f.lastModified
+	t, _ := time.Parse(time.RFC3339, f.object.LastModified)
+
+	return t
 }

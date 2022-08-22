@@ -38,7 +38,7 @@ func (d *Driver) Storage() (core.Storage, error) {
 		client: client,
 	}
 
-	return &Storage{store: store}, nil
+	return core.NewStorage(&store), nil
 }
 
 func (d Driver) Name() string {

@@ -26,7 +26,7 @@ func (s *Store) Get(key string) (io.ReadCloser, error) {
 }
 
 func (s *Store) SaveToFile(key string, localPath string) error {
-	return s.Bucket.GetObjectToFile(key, localPath)
+	panic("deprecated")
 }
 
 func (s *Store) Delete(key string) error {
@@ -41,16 +41,16 @@ func (s *Store) Exists(key string) (bool, error) {
 	return s.Bucket.IsObjectExist(key)
 }
 
-func (s Store) ListObjects(marker oss.Option) (oss.ListObjectsResult, error) {
-	return s.Bucket.ListObjects(marker)
+func (s Store) listObjects(marker interface{}) (oss.ListObjectsResult, error) {
+	return s.Bucket.ListObjects(marker.(oss.Option))
 }
 
 func (s *Store) Iterator(dir string) core.FileIterator {
-	chunk := func(marker oss.Option) (oss.ListObjectsResult, error) {
-		return s.ListObjects(marker)
+	chunk := func(marker interface{}) (core.ListObjectResult, error) {
+		result, err := s.listObjects(marker)
+
+		return &ListObjectResult{ossResult: result}, err
 	}
 
-	it := newFileIterator(dir, chunk)
-
-	return &it
+	return core.NewFileIterator(oss.Prefix(dir), chunk)
 }

@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"reflect"
 	"testing"
 
 	config2 "github.com/eleven26/goss/config"
@@ -45,7 +44,7 @@ func init() {
 		log.Fatal(err)
 	}
 
-	object = storage.(*Storage).store.client.Object
+	object = storage.Store().(*Store).client.Object
 
 	testdata = filepath.Join(utils.RootDir(), "testdata")
 	fooPath = filepath.Join(testdata, "foo.txt")
@@ -213,10 +212,4 @@ func TestFiles(t *testing.T) {
 	var expectedSize int64 = 3
 	assert.Equal(t, "test/foo.txt", files[0].Key())
 	assert.Equal(t, expectedSize, files[0].Size())
-}
-
-func TestStorage(t *testing.T) {
-	s := storage.Storage()
-
-	assert.Equal(t, "tencent.Storage", reflect.TypeOf(s).Elem().String())
 }

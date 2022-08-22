@@ -5,7 +5,7 @@ import (
 	"context"
 	"io"
 	"net/http"
-	"os"
+	"strconv"
 	"time"
 
 	"github.com/eleven26/goss/core"
@@ -18,7 +18,7 @@ type Store struct {
 	bucketManager *storage.BucketManager
 }
 
-func (s *Store) put(key string, r io.Reader) (*storage.PutRet, error) {
+func (s *Store) Put(key string, r io.Reader) error {
 	upToken := s.upToken()
 	formUploader := s.uploader()
 	ret := storage.PutRet{}
@@ -26,15 +26,15 @@ func (s *Store) put(key string, r io.Reader) (*storage.PutRet, error) {
 	buf := new(bytes.Buffer)
 	size, err := io.Copy(buf, r)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	err = formUploader.Put(context.Background(), &ret, upToken, key, buf, size, nil)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return &ret, nil
+	return err
 }
 
 func (s *Store) upToken() string {
@@ -57,17 +57,18 @@ func (s *Store) uploader() *storage.FormUploader {
 	return storage.NewFormUploader(&cfg)
 }
 
-func (s *Store) putFromFile(key string, localPath string) (*storage.PutRet, error) {
+func (s *Store) PutFromFile(key string, localPath string) error {
 	upToken := s.upToken()
 	formUploader := s.uploader()
 	ret := storage.PutRet{}
 
-	err := formUploader.PutFile(context.Background(), &ret, upToken, key, localPath, nil)
-	if err != nil {
-		return nil, err
-	}
+	return formUploader.PutFile(context.Background(), &ret, upToken, key, localPath, nil)
+}
 
-	return &ret, nil
+func (s Store) Get(key string) (io.ReadCloser, error) {
+	url := s.getDownloadUrl(key)
+
+	return s.getUrlContent(url)
 }
 
 func (s *Store) getDownloadUrl(key string) string {
@@ -93,42 +94,49 @@ func (s *Store) getUrlContent(url string) (io.ReadCloser, error) {
 	return resp.Body, nil
 }
 
-func (s *Store) Stat(key string) (fileInfo storage.FileInfo, err error) {
-	return s.bucketManager.Stat(s.config.Bucket, key)
+func (s *Store) Meta(key string) (http.Header, error) {
+	fi, err := s.bucketManager.Stat(s.config.Bucket, key)
+	if err != nil {
+		return nil, err
+	}
+
+	header := http.Header{}
+	header.Set("Content-Length", strconv.FormatInt(fi.Fsize, 10))
+
+	return header, nil
 }
 
 func (s *Store) SaveToFile(key string, localPath string) error {
-	url := s.getDownloadUrl(key)
-	rc, err := s.getUrlContent(url)
+	panic("deprecated")
+}
+
+func (s Store) Exists(key string) (bool, error) {
+	_, err := s.Meta(key)
 	if err != nil {
-		return err
+		return false, err
 	}
 
-	defer func(rc io.ReadCloser) {
-		err = rc.Close()
-	}(rc)
-
-	// 保存到文件 localPath
-	f, _ := os.OpenFile(localPath, os.O_CREATE|os.O_WRONLY, 0o644)
-	defer func(f *os.File) {
-		err = f.Close()
-	}(f)
-
-	_, err = io.Copy(f, rc)
-
-	return err
+	return true, nil
 }
 
 func (s *Store) Delete(key string) error {
 	return s.bucketManager.Delete(s.config.Bucket, key)
 }
 
+// Iterator todo more tests (about marker)
 func (s *Store) Iterator(dir string) core.FileIterator {
-	chunk := func(marker string) (entries []storage.ListItem, commonPrefixes []string, nextMarker string, hasNext bool, err error) {
-		return s.bucketManager.ListFiles(s.config.Bucket, dir, "", marker, 100)
+	chunk := func(marker interface{}) (core.ListObjectResult, error) {
+		entries, _, nextMarker, hasNext, err := s.bucketManager.ListFiles(s.config.Bucket, marker.(string), "", "", 100)
+		if err != nil {
+			return nil, err
+		}
+
+		return &ListObjectResult{
+			entries:    entries,
+			nextMarker: nextMarker,
+			hasNext:    hasNext,
+		}, nil
 	}
 
-	it := newFileIterator(dir, chunk)
-
-	return &it
+	return core.NewFileIterator(dir, chunk)
 }

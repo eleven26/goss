@@ -3,7 +3,6 @@ package huawei
 import (
 	"io"
 	"net/http"
-	"os"
 	"strconv"
 
 	"github.com/eleven26/goss/core"
@@ -51,24 +50,7 @@ func (s *Store) Get(key string) (io.ReadCloser, error) {
 }
 
 func (s *Store) SaveToFile(key string, localPath string) error {
-	rc, err := s.Get(key)
-	if err != nil {
-		return err
-	}
-
-	defer func(rc io.ReadCloser) {
-		err = rc.Close()
-	}(rc)
-
-	// 保存到文件 localPath
-	f, _ := os.OpenFile(localPath, os.O_CREATE|os.O_WRONLY, 0o644)
-	defer func(f *os.File) {
-		err = f.Close()
-	}(f)
-
-	_, err = io.Copy(f, rc)
-
-	return err
+	panic("deprecated")
 }
 
 func (s *Store) Delete(key string) error {
@@ -106,19 +88,25 @@ func (s *Store) Exists(key string) (bool, error) {
 	return true, nil
 }
 
-func (s Store) ListObjects(input *obs.ListObjectsInput) (output *obs.ListObjectsOutput, err error) {
+func (s Store) listObjects(input *obs.ListObjectsInput) (output *obs.ListObjectsOutput, err error) {
 	return s.client.ListObjects(input)
 }
 
 func (s *Store) Iterator(dir string) core.FileIterator {
-	chunk := func(marker string) (*obs.ListObjectsOutput, error) {
+	chunk := func(marker interface{}) (core.ListObjectResult, error) {
 		input := &obs.ListObjectsInput{}
 		input.Bucket = s.config.Bucket
-		input.Marker = dir
-		return s.ListObjects(input)
+		input.Marker = marker.(string)
+
+		output, err := s.listObjects(input)
+		if err != nil {
+			return nil, err
+		}
+
+		return &ListObjectResult{
+			output: output,
+		}, nil
 	}
 
-	it := newFileIterator(dir, chunk)
-
-	return &it
+	return core.NewFileIterator(dir, chunk)
 }

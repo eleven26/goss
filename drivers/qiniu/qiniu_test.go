@@ -21,7 +21,7 @@ import (
 var (
 	storage2 core.Storage
 
-	store Store
+	store *Store
 
 	key          = "test/foo.txt"
 	testdata     string
@@ -41,7 +41,7 @@ func init() {
 		log.Fatal(err)
 	}
 
-	store = storage2.(*Storage).store
+	store = storage2.Store().(*Store)
 
 	testdata = filepath.Join(utils.RootDir(), "testdata")
 	fooPath = filepath.Join(testdata, "foo.txt")
@@ -171,7 +171,7 @@ func TestExists(t *testing.T) {
 
 	exists, err = storage2.Exists(key + "not_exists")
 
-	assert.Nil(t, err)
+	assert.NotNil(t, err)
 	assert.False(t, exists)
 }
 

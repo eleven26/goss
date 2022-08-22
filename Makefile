@@ -21,9 +21,9 @@ test:
 .PHONY: integration
 integration:
 	go test -v ./drivers/aliyun -cover -tags=integration
-	go test -v ./drivers/tencent -cover -tags=integration
-	go test -v ./drivers/qiniu -cover -tags=integration
 	go test -v ./drivers/huawei -cover -tags=integration
+	go test -v ./drivers/qiniu -cover -tags=integration
+	go test -v ./drivers/tencent -cover -tags=integration
 	go test -v ./goss/* -cover -tags=integration
 
 .PHONY: all

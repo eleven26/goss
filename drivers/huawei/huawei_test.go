@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"reflect"
 	"testing"
 
 	fs "github.com/eleven26/go-filesystem"
@@ -22,8 +21,11 @@ import (
 
 var (
 	storage core.Storage
+	store   *Store
 
-	store Store
+	client *obs.ObsClient
+
+	conf config
 
 	key          = "test/foo.txt"
 	testdata     string
@@ -32,7 +34,9 @@ var (
 )
 
 func init() {
-	err := config2.ReadInUserHomeConfig()
+	var err error
+
+	err = config2.ReadInUserHomeConfig()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -42,8 +46,14 @@ func init() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	store = storage.Store().(*Store)
 
-	store = storage.(*Storage).store
+	conf = *getConfig()
+
+	client, err = getClient()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	testdata = filepath.Join(utils.RootDir(), "testdata")
 	fooPath = filepath.Join(testdata, "foo.txt")
@@ -64,10 +74,10 @@ func tearDown(t *testing.T) {
 
 func deleteRemote(t *testing.T) {
 	input := &obs.DeleteObjectInput{}
-	input.Bucket = store.config.Bucket
+	input.Bucket = conf.Bucket
 	input.Key = key
 
-	_, err := store.client.DeleteObject(input)
+	_, err := client.DeleteObject(input)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -215,10 +225,4 @@ func TestFiles(t *testing.T) {
 	var expectedSize int64 = 3
 	assert.Equal(t, key, files[0].Key())
 	assert.Equal(t, expectedSize, files[0].Size())
-}
-
-func TestStorage(t *testing.T) {
-	s := storage.Storage()
-
-	assert.Equal(t, "huawei.Storage", reflect.TypeOf(s).Elem().String())
 }

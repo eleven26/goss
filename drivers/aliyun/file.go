@@ -1,31 +1,31 @@
 package aliyun
 
-import "time"
+import (
+	"time"
+
+	"github.com/aliyun/aliyun-oss-go-sdk/oss"
+)
 
 type File struct {
-	key          string
-	typ          string
-	size         int64
-	eTag         string
-	lastModified time.Time
+	properties oss.ObjectProperties
 }
 
 func (f *File) Key() string {
-	return f.key
+	return f.properties.Key
 }
 
 func (f *File) Type() string {
-	return f.typ
+	return f.properties.Type
 }
 
 func (f *File) Size() int64 {
-	return f.size
+	return f.properties.Size
 }
 
 func (f *File) ETag() string {
-	return f.eTag
+	return f.properties.ETag
 }
 
 func (f *File) LastModified() time.Time {
-	return f.lastModified
+	return f.properties.LastModified
 }

@@ -2,7 +2,11 @@ package tencent
 
 import (
 	"context"
+	"errors"
 	"io"
+	"io/ioutil"
+	"net/http"
+	"strconv"
 
 	"github.com/eleven26/goss/core"
 	"github.com/tencentyun/cos-go-sdk-v5"
@@ -12,20 +16,43 @@ type Store struct {
 	client *cos.Client
 }
 
-func (s *Store) Put(key string, r io.Reader) (*cos.Response, error) {
-	return s.client.Object.Put(context.Background(), key, r, nil)
+func (s *Store) Put(key string, r io.Reader) error {
+	response, err := s.client.Object.Put(context.Background(), key, r, nil)
+	if err != nil {
+		return err
+	}
+
+	if response.StatusCode != http.StatusOK {
+		return httpError(response)
+	}
+
+	return nil
 }
 
-func (s *Store) PutFromFile(key string, localPath string) (*cos.Response, error) {
-	return s.client.Object.PutFromFile(context.Background(), key, localPath, nil)
+func (s *Store) PutFromFile(key string, localPath string) error {
+	response, err := s.client.Object.PutFromFile(context.Background(), key, localPath, nil)
+	if err != nil {
+		return err
+	}
+
+	if response.StatusCode != http.StatusOK {
+		return httpError(response)
+	}
+
+	return nil
 }
 
-func (s *Store) Get(key string) (*cos.Response, error) {
-	return s.client.Object.Get(context.Background(), key, nil)
+func (s *Store) Get(key string) (io.ReadCloser, error) {
+	resp, err := s.client.Object.Get(context.Background(), key, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.Body, nil
 }
 
-func (s *Store) SaveToFile(key string, localPath string) (*cos.Response, error) {
-	return s.client.Object.GetToFile(context.Background(), key, localPath, nil)
+func (s *Store) SaveToFile(key string, localPath string) error {
+	panic("deprecated")
 }
 
 func (s *Store) Delete(key string) error {
@@ -34,25 +61,56 @@ func (s *Store) Delete(key string) error {
 	return err
 }
 
-func (s *Store) Head(key string) (*cos.Response, error) {
-	return s.client.Object.Head(context.Background(), key, nil)
+func (s *Store) Meta(key string) (http.Header, error) {
+	resp, err := s.client.Object.Head(context.Background(), key, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	header := http.Header{}
+	header.Set("Content-Length", strconv.FormatInt(resp.ContentLength, 10))
+
+	return header, nil
 }
 
 func (s *Store) Exists(key string) (bool, error) {
 	return s.client.Object.IsExist(context.Background(), key)
 }
 
-func (s Store) GetWithOpt(opt *cos.BucketGetOptions) (*cos.BucketGetResult, *cos.Response, error) {
+func (s Store) getWithOpt(opt *cos.BucketGetOptions) (*cos.BucketGetResult, *cos.Response, error) {
 	return s.client.Bucket.Get(context.Background(), opt)
 }
 
 func (s *Store) Iterator(dir string) core.FileIterator {
-	chunk := func(opt *cos.BucketGetOptions) (*cos.BucketGetResult, *cos.Response, error) {
-		return s.GetWithOpt(opt)
+	chunk := func(marker interface{}) (core.ListObjectResult, error) {
+		var result *cos.BucketGetResult
+		var err error
+
+		if opt, ok := marker.(*cos.BucketGetOptions); ok {
+			result, _, err = s.getWithOpt(opt)
+		} else {
+			opt = &cos.BucketGetOptions{Prefix: dir}
+			result, _, err = s.getWithOpt(opt)
+		}
+
+		if err != nil {
+			return nil, err
+		}
+
+		return &ListObjectResult{result: result}, nil
 	}
 
-	it := newFileIterator(dir)
-	it.nextChunk = chunk
+	return core.NewFileIterator(dir, chunk)
+}
 
-	return &it
+func httpError(response *cos.Response) error {
+	bytes, err := ioutil.ReadAll(response.Body)
+	defer func() {
+		err = response.Body.Close()
+	}()
+	if err != nil {
+		return err
+	}
+
+	return errors.New(string(bytes))
 }

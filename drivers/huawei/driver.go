@@ -14,11 +14,7 @@ func NewDriver() core.Driver {
 func (d *Driver) Storage() (core.Storage, error) {
 	conf := getConfig()
 
-	if conf.Endpoint == "" || conf.Location == "" || conf.Bucket == "" || conf.AccessKey == "" || conf.SecretKey == "" {
-		return nil, core.ErrorConfigEmpty
-	}
-
-	client, err := obs.New(conf.AccessKey, conf.SecretKey, conf.Endpoint)
+	client, err := getClient()
 	if err != nil {
 		return nil, err
 	}
@@ -28,9 +24,17 @@ func (d *Driver) Storage() (core.Storage, error) {
 		config: *conf,
 	}
 
-	return &Storage{
-		store: store,
-	}, nil
+	return core.NewStorage(&store), nil
+}
+
+func getClient() (*obs.ObsClient, error) {
+	conf := getConfig()
+
+	if conf.Endpoint == "" || conf.Location == "" || conf.Bucket == "" || conf.AccessKey == "" || conf.SecretKey == "" {
+		return nil, core.ErrorConfigEmpty
+	}
+
+	return obs.New(conf.AccessKey, conf.SecretKey, conf.Endpoint)
 }
 
 func (d Driver) Name() string {
