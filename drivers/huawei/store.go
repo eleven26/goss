@@ -6,7 +6,6 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/eleven26/goss/core"
 	"github.com/huaweicloud/huaweicloud-sdk-go-obs/obs"
 )
@@ -107,10 +106,19 @@ func (s *Store) Exists(key string) (bool, error) {
 	return true, nil
 }
 
-func (s Store) ListObjects(marker oss.Option) (oss.ListObjectsResult, error) {
-	panic("")
+func (s Store) ListObjects(input *obs.ListObjectsInput) (output *obs.ListObjectsOutput, err error) {
+	return s.client.ListObjects(input)
 }
 
 func (s *Store) Iterator(dir string) core.FileIterator {
-	panic("")
+	chunk := func(marker string) (*obs.ListObjectsOutput, error) {
+		input := &obs.ListObjectsInput{}
+		input.Bucket = s.config.Bucket
+		input.Marker = dir
+		return s.ListObjects(input)
+	}
+
+	it := newFileIterator(dir, chunk)
+
+	return &it
 }

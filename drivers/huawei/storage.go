@@ -59,8 +59,7 @@ func (s *Storage) Exists(key string) (bool, error) {
 }
 
 func (s *Storage) Files(dir string) ([]core.File, error) {
-	// TODO implement me
-	panic("implement me")
+	return s.store.Iterator(dir).All()
 }
 
 func (s *Storage) Size(key string) (int64, error) {

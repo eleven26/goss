@@ -205,16 +205,16 @@ func TestExists(t *testing.T) {
 }
 
 func TestFiles(t *testing.T) {
-	//setUp(t)
-	//defer tearDown(t)
-	//
-	//files, err := storage.Files("test/")
-	//assert.Nil(t, err)
-	//assert.Len(t, files, 1)
-	//
-	//var expectedSize int64 = 3
-	//assert.Equal(t, key, files[0].Key())
-	//assert.Equal(t, expectedSize, files[0].Size())
+	setUp(t)
+	defer tearDown(t)
+
+	files, err := storage.Files("test/")
+	assert.Nil(t, err)
+	assert.Len(t, files, 1)
+
+	var expectedSize int64 = 3
+	assert.Equal(t, key, files[0].Key())
+	assert.Equal(t, expectedSize, files[0].Size())
 }
 
 func TestStorage(t *testing.T) {
