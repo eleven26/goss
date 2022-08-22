@@ -3,10 +3,9 @@ package goss
 import (
 	"errors"
 
-	"github.com/eleven26/goss/drivers/huawei"
-
 	"github.com/eleven26/goss/core"
 	"github.com/eleven26/goss/drivers/aliyun"
+	"github.com/eleven26/goss/drivers/huawei"
 	"github.com/eleven26/goss/drivers/qiniu"
 	"github.com/eleven26/goss/drivers/tencent"
 
