@@ -1,6 +1,6 @@
 # goss
 
-✨ `goss` 是一个简洁的云存储 golang 库，支持**阿里云**、**腾讯云**、**七牛云**。
+✨ `goss` 是一个简洁的云存储 golang 库，支持**阿里云**、**腾讯云**、**七牛云**、**华为云**。
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/eleven26/go-filesystem.svg)](https://pkg.go.dev/github.com/eleven26/goss)
 [![Go Report Card](https://goreportcard.com/badge/github.com/eleven26/go-filesystem)](https://goreportcard.com/report/github.com/eleven26/goss)
