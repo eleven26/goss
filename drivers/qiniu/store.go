@@ -134,18 +134,26 @@ func (s *Store) Delete(key string) error {
 
 // Iterator todo more tests (about marker)
 func (s *Store) Iterator(dir string) core.FileIterator {
-	chunk := func(marker interface{}) (core.ListObjectResult, error) {
-		entries, _, nextMarker, hasNext, err := s.bucketManager.ListFiles(s.config.Bucket, marker.(string), "", "", 100)
-		if err != nil {
-			return nil, err
-		}
+	return core.NewFileIterator(dir, &Chunks{
+		bucket:        s.config.Bucket,
+		bucketManager: s.bucketManager,
+	})
+}
 
-		return &ListObjectResult{
-			entries:    entries,
-			nextMarker: nextMarker,
-			hasNext:    hasNext,
-		}, nil
+type Chunks struct {
+	bucket        string
+	bucketManager *storage.BucketManager
+}
+
+func (c *Chunks) Chunk(marker interface{}) (core.ListObjectResult, error) {
+	entries, _, nextMarker, hasNext, err := c.bucketManager.ListFiles(c.bucket, marker.(string), "", "", 100)
+	if err != nil {
+		return nil, err
 	}
 
-	return core.NewFileIterator(dir, chunk)
+	return &ListObjectResult{
+		entries:    entries,
+		nextMarker: nextMarker,
+		hasNext:    hasNext,
+	}, nil
 }

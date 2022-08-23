@@ -7,13 +7,15 @@ type FileIterator interface {
 	GetNextChunk() error
 }
 
-type chunk func(marker interface{}) (ListObjectResult, error)
+type Chunks interface {
+	Chunk(marker interface{}) (ListObjectResult, error)
+}
 
 type fileIterator struct {
 	// 获取下一批数据的 marker
 	marker interface{}
 	// 获取下一批数据的函数
-	nextChunk chunk
+	chunks Chunks
 	// ListObjects 的返回值
 	result ListObjectResult
 	// 当前获取的结果遍历到的下标
@@ -24,10 +26,10 @@ type fileIterator struct {
 	isFinished bool
 }
 
-func NewFileIterator(marker interface{}, chunk chunk) FileIterator {
+func NewFileIterator(marker interface{}, chunks Chunks) FileIterator {
 	return &fileIterator{
-		marker:    marker,
-		nextChunk: chunk,
+		marker: marker,
+		chunks: chunks,
 	}
 }
 
@@ -56,7 +58,7 @@ func (f *fileIterator) Next() (file File, err error) {
 }
 
 func (f *fileIterator) GetNextChunk() error {
-	result, err := f.nextChunk(f.marker)
+	result, err := f.chunks.Chunk(f.marker)
 	if err != nil {
 		return err
 	}

@@ -96,25 +96,29 @@ func (s *Store) Exists(key string) (bool, error) {
 	return true, nil
 }
 
-func (s Store) listObjects(input *obs.ListObjectsInput) (output *obs.ListObjectsOutput, err error) {
-	return s.client.ListObjects(input)
+func (s *Store) Iterator(dir string) core.FileIterator {
+	return core.NewFileIterator(dir, &Chunks{
+		bucket: s.config.Bucket,
+		client: s.client,
+	})
 }
 
-func (s *Store) Iterator(dir string) core.FileIterator {
-	chunk := func(marker interface{}) (core.ListObjectResult, error) {
-		input := &obs.ListObjectsInput{}
-		input.Bucket = s.config.Bucket
-		input.Marker = marker.(string)
+type Chunks struct {
+	bucket string
+	client *obs.ObsClient
+}
 
-		output, err := s.listObjects(input)
-		if err != nil {
-			return nil, err
-		}
+func (c *Chunks) Chunk(marker interface{}) (core.ListObjectResult, error) {
+	input := &obs.ListObjectsInput{}
+	input.Bucket = c.bucket
+	input.Marker = marker.(string)
 
-		return &ListObjectResult{
-			output: output,
-		}, nil
+	output, err := c.client.ListObjects(input)
+	if err != nil {
+		return nil, err
 	}
 
-	return core.NewFileIterator(dir, chunk)
+	return &ListObjectResult{
+		output: output,
+	}, nil
 }

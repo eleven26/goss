@@ -48,16 +48,16 @@ func (s *Store) Exists(key string) (bool, error) {
 	return s.Bucket.IsObjectExist(key)
 }
 
-func (s Store) listObjects(marker interface{}) (oss.ListObjectsResult, error) {
-	return s.Bucket.ListObjects(marker.(oss.Option))
+func (s *Store) Iterator(dir string) core.FileIterator {
+	return core.NewFileIterator(oss.Prefix(dir), &Chunks{bucket: s.Bucket})
 }
 
-func (s *Store) Iterator(dir string) core.FileIterator {
-	chunk := func(marker interface{}) (core.ListObjectResult, error) {
-		result, err := s.listObjects(marker)
+type Chunks struct {
+	bucket *oss.Bucket
+}
 
-		return &ListObjectResult{ossResult: result}, err
-	}
+func (c *Chunks) Chunk(marker interface{}) (core.ListObjectResult, error) {
+	result, err := c.bucket.ListObjects(marker.(oss.Option))
 
-	return core.NewFileIterator(oss.Prefix(dir), chunk)
+	return &ListObjectResult{ossResult: result}, err
 }

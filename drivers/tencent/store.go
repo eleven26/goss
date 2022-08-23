@@ -73,30 +73,11 @@ func (s *Store) Exists(key string) (bool, error) {
 	return s.client.Object.IsExist(context.Background(), key)
 }
 
-func (s Store) getWithOpt(opt *cos.BucketGetOptions) (*cos.BucketGetResult, *cos.Response, error) {
-	return s.client.Bucket.Get(context.Background(), opt)
-}
-
 func (s *Store) Iterator(dir string) core.FileIterator {
-	chunk := func(marker interface{}) (core.ListObjectResult, error) {
-		var result *cos.BucketGetResult
-		var err error
-
-		if opt, ok := marker.(*cos.BucketGetOptions); ok {
-			result, _, err = s.getWithOpt(opt)
-		} else {
-			opt = &cos.BucketGetOptions{Prefix: dir}
-			result, _, err = s.getWithOpt(opt)
-		}
-
-		if err != nil {
-			return nil, err
-		}
-
-		return &ListObjectResult{result: result}, nil
-	}
-
-	return core.NewFileIterator(dir, chunk)
+	return core.NewFileIterator(dir, &Chunks{
+		dir:    dir,
+		bucket: s.client.Bucket,
+	})
 }
 
 func httpError(response *cos.Response) error {
@@ -109,4 +90,27 @@ func httpError(response *cos.Response) error {
 	}
 
 	return errors.New(string(bytes))
+}
+
+type Chunks struct {
+	dir    string
+	bucket *cos.BucketService
+}
+
+func (c *Chunks) Chunk(marker interface{}) (core.ListObjectResult, error) {
+	var result *cos.BucketGetResult
+	var err error
+
+	if opt, ok := marker.(*cos.BucketGetOptions); ok {
+		result, _, err = c.bucket.Get(context.Background(), opt)
+	} else {
+		opt = &cos.BucketGetOptions{Prefix: c.dir}
+		result, _, err = c.bucket.Get(context.Background(), opt)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &ListObjectResult{result: result}, nil
 }
