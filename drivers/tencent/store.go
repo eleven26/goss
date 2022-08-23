@@ -6,7 +6,6 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"strconv"
 
 	"github.com/eleven26/goss/core"
 	"github.com/tencentyun/cos-go-sdk-v5"
@@ -61,16 +60,13 @@ func (s *Store) Delete(key string) error {
 	return err
 }
 
-func (s *Store) Meta(key string) (http.Header, error) {
+func (s *Store) Size(key string) (int64, error) {
 	resp, err := s.client.Object.Head(context.Background(), key, nil)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
-	header := http.Header{}
-	header.Set("Content-Length", strconv.FormatInt(resp.ContentLength, 10))
-
-	return header, nil
+	return resp.ContentLength, nil
 }
 
 func (s *Store) Exists(key string) (bool, error) {

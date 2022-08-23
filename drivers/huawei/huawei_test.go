@@ -104,7 +104,7 @@ func TestPut(t *testing.T) {
 	err = storage.Put(key, f)
 	assert.Nil(t, err)
 
-	header, err := store.Meta(key)
+	header, err := store.meta(key)
 	assert.Nil(t, err)
 	assert.NotNil(t, header)
 }
@@ -115,7 +115,7 @@ func TestPutFromFile(t *testing.T) {
 	err := storage.PutFromFile(key, fooPath)
 	assert.Nil(t, err)
 
-	header, err := store.Meta(key)
+	header, err := store.meta(key)
 	assert.Nil(t, err)
 	assert.NotNil(t, header)
 }

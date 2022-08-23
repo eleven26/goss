@@ -2,7 +2,7 @@ package aliyun
 
 import (
 	"io"
-	"net/http"
+	"strconv"
 
 	"github.com/eleven26/goss/core"
 
@@ -33,8 +33,15 @@ func (s *Store) Delete(key string) error {
 	return s.Bucket.DeleteObject(key)
 }
 
-func (s *Store) Meta(key string) (http.Header, error) {
-	return s.Bucket.GetObjectDetailedMeta(key)
+func (s *Store) Size(key string) (int64, error) {
+	header, err := s.Bucket.GetObjectDetailedMeta(key)
+	if err != nil {
+		return 0, err
+	}
+
+	length := header.Get("Content-Length")
+
+	return strconv.ParseInt(length, 10, 64)
 }
 
 func (s *Store) Exists(key string) (bool, error) {

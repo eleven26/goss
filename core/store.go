@@ -2,7 +2,6 @@ package core
 
 import (
 	"io"
-	"net/http"
 )
 
 type Store interface {
@@ -11,7 +10,7 @@ type Store interface {
 	Get(key string) (io.ReadCloser, error)
 	SaveToFile(key string, localPath string) error
 	Delete(key string) error
-	Meta(key string) (http.Header, error)
+	Size(key string) (int64, error)
 	Exists(key string) (bool, error)
 	Iterator(marker string) FileIterator
 }

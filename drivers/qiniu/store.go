@@ -94,7 +94,7 @@ func (s *Store) getUrlContent(url string) (io.ReadCloser, error) {
 	return resp.Body, nil
 }
 
-func (s *Store) Meta(key string) (http.Header, error) {
+func (s *Store) meta(key string) (http.Header, error) {
 	fi, err := s.bucketManager.Stat(s.config.Bucket, key)
 	if err != nil {
 		return nil, err
@@ -106,12 +106,21 @@ func (s *Store) Meta(key string) (http.Header, error) {
 	return header, nil
 }
 
+func (s *Store) Size(key string) (int64, error) {
+	fi, err := s.bucketManager.Stat(s.config.Bucket, key)
+	if err != nil {
+		return 0, err
+	}
+
+	return fi.Fsize, nil
+}
+
 func (s *Store) SaveToFile(key string, localPath string) error {
 	panic("deprecated")
 }
 
 func (s Store) Exists(key string) (bool, error) {
-	_, err := s.Meta(key)
+	_, err := s.meta(key)
 	if err != nil {
 		return false, err
 	}

@@ -2,8 +2,6 @@ package huawei
 
 import (
 	"io"
-	"net/http"
-	"strconv"
 
 	"github.com/eleven26/goss/core"
 	"github.com/huaweicloud/huaweicloud-sdk-go-obs/obs"
@@ -63,7 +61,7 @@ func (s *Store) Delete(key string) error {
 	return err
 }
 
-func (s *Store) Meta(key string) (http.Header, error) {
+func (s *Store) meta(key string) (*obs.GetObjectMetadataOutput, error) {
 	input := &obs.GetObjectMetadataInput{}
 	input.Bucket = s.config.Bucket
 	input.Key = key
@@ -73,14 +71,24 @@ func (s *Store) Meta(key string) (http.Header, error) {
 		return nil, err
 	}
 
-	header := http.Header{}
-	header.Set("Content-Length", strconv.FormatInt(output.ContentLength, 10))
+	return output, nil
+}
 
-	return header, nil
+func (s *Store) Size(key string) (int64, error) {
+	input := &obs.GetObjectMetadataInput{}
+	input.Bucket = s.config.Bucket
+	input.Key = key
+
+	output, err := s.client.GetObjectMetadata(input)
+	if err != nil {
+		return 0, err
+	}
+
+	return output.ContentLength, nil
 }
 
 func (s *Store) Exists(key string) (bool, error) {
-	_, err := s.Meta(key)
+	_, err := s.meta(key)
 	if err != nil {
 		return false, err
 	}

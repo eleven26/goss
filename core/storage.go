@@ -4,7 +4,6 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"strconv"
 )
 
 type Storage interface {
@@ -99,12 +98,7 @@ func (s *storage) GetToFile(key string, localPath string) (err error) {
 }
 
 func (s *storage) Size(key string) (int64, error) {
-	header, err := s.store.Meta(key)
-	if err != nil {
-		return 0, err
-	}
-
-	return strconv.ParseInt(header.Get("Content-Length"), 10, 64)
+	return s.store.Size(key)
 }
 
 func (s *storage) Delete(key string) error {
