@@ -20,3 +20,10 @@ qiniu:
   secret_key:
   domain:
   private:
+
+huawei:
+  endpoint:
+  location:
+  bucket:
+  access_key:
+  secret_key:

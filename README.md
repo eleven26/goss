@@ -53,6 +53,14 @@ qiniu:
   domain:
   # 是否是私有空间
   private:
+
+# 华为云 obs 配置
+huawei:
+  endpoint:
+  location:
+  bucket:
+  access_key:
+  secret_key:
 ```
 
 样例配置：
