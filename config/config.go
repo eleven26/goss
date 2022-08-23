@@ -3,10 +3,13 @@ package config
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	fs "github.com/eleven26/go-filesystem"
 	"github.com/spf13/viper"
 )
+
+const File = ".goss.yml"
 
 func ReadInConfig(path string) error {
 	exist, err := fs.Exists(path)
@@ -37,7 +40,7 @@ func UserHomeConfigPath() (string, error) {
 		return "", err
 	}
 
-	file := home + "/.goss.yml"
+	file := filepath.Join(home, File)
 	exist, err := fs.Exists(file)
 	if err != nil {
 		return "", err
