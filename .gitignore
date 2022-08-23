@@ -23,3 +23,6 @@ bin
 *.temp
 
 dist
+
+testdata/*
+!testdata/foo.txt
