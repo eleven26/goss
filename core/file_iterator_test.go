@@ -13,28 +13,33 @@ type FileStub struct {
 }
 
 func (f *FileStub) Key() string {
-	// TODO implement me
-	panic("implement me")
+	args := f.Called()
+
+	return args.String(0)
 }
 
 func (f *FileStub) Type() string {
-	// TODO implement me
-	panic("implement me")
+	args := f.Called()
+
+	return args.String(0)
 }
 
 func (f *FileStub) Size() int64 {
-	// TODO implement me
-	panic("implement me")
+	args := f.Called()
+
+	return args.Get(0).(int64)
 }
 
 func (f *FileStub) ETag() string {
-	// TODO implement me
-	panic("implement me")
+	args := f.Called()
+
+	return args.String(0)
 }
 
 func (f *FileStub) LastModified() time.Time {
-	// TODO implement me
-	panic("implement me")
+	args := f.Called()
+
+	return args.Get(0).(time.Time)
 }
 
 type ResultStub struct {
@@ -65,18 +70,39 @@ func (r *ResultStub) Get(index int) File {
 	return args.Get(0).(File)
 }
 
-//func chunks(marker interface{}) (ListObjectResult, error) {
-//	return nil, nil
-//}
+type ChunksStub struct {
+	mock.Mock
+}
+
+func (c *ChunksStub) Chunk(marker interface{}) (ListObjectResult, error) {
+	args := c.Called(marker)
+
+	return args.Get(0).(ListObjectResult), args.Error(1)
+}
 
 func TestGetNextChunk(t *testing.T) {
-	fi := fileIterator{
-		marker:     nil,
-		result:     nil,
-		index:      0,
-		count:      0,
-		isFinished: false,
-	}
+	file := new(FileStub)
 
+	result1 := new(ResultStub)
+	result1.On("Len").Return(1)
+	result1.On("IsTruncated").Return(false)
+	result1.AssertNotCalled(t, "NextMarker")
+	result1.On("Get", 0).Return(file)
+
+	chunks := new(ChunksStub)
+	chunks.On("Chunk", "a").Return(result1, nil)
+
+	fi := fileIterator{
+		marker: "a",
+		chunks: chunks,
+	}
 	assert.True(t, fi.HasNext())
+
+	files, err := fi.All()
+	assert.Nil(t, err)
+	assert.Len(t, files, 1)
+	assert.Equal(t, file, files[0])
+
+	result1.AssertExpectations(t)
+	chunks.AssertExpectations(t)
 }
