@@ -9,15 +9,17 @@ import (
 	"github.com/spf13/viper"
 )
 
+// File The name of configuration file.
 const File = ".goss.yml"
 
+// ReadInConfig Load the configuration file from the specified path.
 func ReadInConfig(path string) error {
 	exist, err := fs.Exists(path)
 	if err != nil {
 		return err
 	}
 	if !exist {
-		return fmt.Errorf("配置文件不存在：%s\n", path)
+		return fmt.Errorf("Configuration file not exists：%s\n", path)
 	}
 
 	viper.SetConfigFile(path)
@@ -25,6 +27,7 @@ func ReadInConfig(path string) error {
 	return viper.ReadInConfig()
 }
 
+// ReadInUserHomeConfig Load the configuration file from user home directory.
 func ReadInUserHomeConfig() error {
 	path, err := UserHomeConfigPath()
 	if err != nil {
@@ -34,6 +37,7 @@ func ReadInUserHomeConfig() error {
 	return ReadInConfig(path)
 }
 
+// UserHomeConfigPath Get the user home directory configuration path.
 func UserHomeConfigPath() (string, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -46,7 +50,7 @@ func UserHomeConfigPath() (string, error) {
 		return "", err
 	}
 	if !exist {
-		return "", fmt.Errorf("配置文件不存在：%s\n", file)
+		return "", fmt.Errorf("Configuration file not exists：%s\n", file)
 	}
 
 	return file, nil

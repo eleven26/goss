@@ -2,7 +2,7 @@ package core
 
 import "errors"
 
-var ErrorConfigEmpty = errors.New("配置不正确")
+var ErrorConfigEmpty = errors.New("configuration not correct")
 
 type Driver interface {
 	Storage() (Storage, error)
