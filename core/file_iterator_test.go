@@ -80,6 +80,12 @@ func (c *ChunksStub) Chunk(marker interface{}) (ListObjectResult, error) {
 	return args.Get(0).(ListObjectResult), args.Error(1)
 }
 
+func TestNewFileIterator(t *testing.T) {
+	it := NewFileIterator("", new(ChunksStub))
+
+	assert.True(t, it.HasNext())
+}
+
 func TestGetNextChunk(t *testing.T) {
 	file := new(FileStub)
 

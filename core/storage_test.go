@@ -16,6 +16,13 @@ type StoreStub struct {
 	mock.Mock
 }
 
+func TestNewStorage(t *testing.T) {
+	store := new(StoreStub)
+	storage := NewStorage(store)
+
+	assert.Equal(t, store, storage.Store())
+}
+
 func (s *StoreStub) Put(key string, r io.Reader) error {
 	args := s.Called(key, r)
 
