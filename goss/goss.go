@@ -14,10 +14,10 @@ type Goss struct {
 }
 
 // New creates a new instance based on the configuration file pointed to by configPath.
-func New(configPath string) (Goss, error) {
+func New(configPath string) (*Goss, error) {
 	err := config.ReadInConfig(configPath)
 	if err != nil {
-		return Goss{}, err
+		return nil, err
 	}
 
 	goss := Goss{
@@ -26,20 +26,20 @@ func New(configPath string) (Goss, error) {
 
 	driver, err := defaultDriver()
 	if err != nil {
-		return Goss{}, err
+		return nil, err
 	}
 
 	err = goss.RegisterDriver(driver)
 	if err != nil {
-		return Goss{}, err
+		return nil, err
 	}
 
 	err = goss.UseDriver(driver)
 	if err != nil {
-		return Goss{}, err
+		return nil, err
 	}
 
-	return goss, nil
+	return &goss, nil
 }
 
 // RegisterAliyunDriver register aliyun driver.
@@ -58,10 +58,10 @@ func (g *Goss) RegisterQiniuDriver() error {
 }
 
 // NewFromUserHomeConfigPath creates a new instance based on the configuration file pointed to by user home directory.
-func NewFromUserHomeConfigPath() (Goss, error) {
+func NewFromUserHomeConfigPath() (*Goss, error) {
 	path, err := config.UserHomeConfigPath()
 	if err != nil {
-		return Goss{}, err
+		return nil, err
 	}
 
 	return New(path)

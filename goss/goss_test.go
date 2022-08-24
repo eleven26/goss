@@ -13,7 +13,7 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	var goss Goss
+	var goss *Goss
 	var err error
 	var configPath string
 
