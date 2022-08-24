@@ -6,30 +6,39 @@ import (
 	"os"
 )
 
+// Storage defines a unified interface for reading and writing cloud storage objects.
 type Storage interface {
-	// Put 将从 r 读取的内容保存到 oss 的 key
+	// Put saves the content read from r to the key of oss.
 	Put(key string, r io.Reader) error
-	// PutFromFile 将本地路径 localPath 指向的文件保存到 oss 的 key
+
+	// PutFromFile saves the file pointed to by the `localPath` to the oss key.
 	PutFromFile(key string, localPath string) error
 
-	// Get 获取 key 指向的文件
+	// Get gets the file pointed to by key.
 	Get(key string) (io.ReadCloser, error)
-	// GetString 获取 key 指向的文件，返回字符串
+
+	// GetString gets the file pointed to by key and returns a string.
 	GetString(key string) (string, error)
-	// GetBytes 获取 key 指向的文件，返回字节数组
+
+	// GetBytes gets the file pointed to by key and returns a byte array.
 	GetBytes(key string) ([]byte, error)
-	// GetToFile 保存 key 指向的文件到本地 localPath
+
+	// GetToFile saves the file pointed to by key to the localPath.
 	GetToFile(key string, localPath string) error
 
-	// Delete 删除 key 指向的文件
+	// Delete the file pointed to by key.
 	Delete(key string) error
-	// Exists 判断文件是否存在
+
+	// Exists determines whether the file exists.
 	Exists(key string) (bool, error)
-	// Files 列出指定目录下的所有文件
+
+	// Files list all files in the specified directory.
 	Files(dir string) ([]File, error)
-	// Size 获取文件大小
+
+	// Size fet the file size.
 	Size(key string) (int64, error)
 
+	// Store is an instance for calling APIs of different cloud storage service providers.
 	Store() interface{}
 }
 
@@ -37,24 +46,29 @@ type storage struct {
 	store Store
 }
 
+// NewStorage create new Storage instance.
 func NewStorage(store Store) Storage {
 	return &storage{
 		store: store,
 	}
 }
 
+// Put saves the content read from r to the key of oss.
 func (s *storage) Put(key string, r io.Reader) error {
 	return s.store.Put(key, r)
 }
 
+// PutFromFile saves the file pointed to by the `localPath` to the oss key.
 func (s *storage) PutFromFile(key string, localPath string) error {
 	return s.store.PutFromFile(key, localPath)
 }
 
+// Get gets the file pointed to by key.
 func (s *storage) Get(key string) (reader io.ReadCloser, err error) {
 	return s.store.Get(key)
 }
 
+// GetString gets the file pointed to by key and returns a string.
 func (s *storage) GetString(key string) (string, error) {
 	bs, err := s.GetBytes(key)
 	if err != nil {
@@ -64,6 +78,7 @@ func (s *storage) GetString(key string) (string, error) {
 	return string(bs), nil
 }
 
+// GetBytes gets the file pointed to by key and returns a byte array.
 func (s *storage) GetBytes(key string) (bytes []byte, err error) {
 	rc, err := s.store.Get(key)
 	if err != nil {
@@ -77,6 +92,7 @@ func (s *storage) GetBytes(key string) (bytes []byte, err error) {
 	return ioutil.ReadAll(rc)
 }
 
+// GetToFile saves the file pointed to by key to the localPath.
 func (s *storage) GetToFile(key string, localPath string) (err error) {
 	rc, err := s.store.Get(key)
 	if err != nil {
@@ -97,18 +113,22 @@ func (s *storage) GetToFile(key string, localPath string) (err error) {
 	return err
 }
 
+// Size fet the file size.
 func (s *storage) Size(key string) (int64, error) {
 	return s.store.Size(key)
 }
 
+// Delete the file pointed to by key.
 func (s *storage) Delete(key string) error {
 	return s.store.Delete(key)
 }
 
+// Exists determines whether the file exists.
 func (s *storage) Exists(key string) (bool, error) {
 	return s.store.Exists(key)
 }
 
+// Files list all files in the specified directory.
 func (s *storage) Files(dir string) ([]File, error) {
 	return s.store.Iterator(dir).All()
 }

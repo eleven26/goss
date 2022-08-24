@@ -70,7 +70,7 @@ func TestRegister(t *testing.T) {
 
 	err = storages.Register("test", stub)
 	assert.NotNil(t, err)
-	assert.ErrorIs(t, err, errExistsDriver)
+	assert.ErrorIs(t, err, ErrExistsDriver)
 
 	err = storages.Register("test1", StorageStub{})
 	assert.Nil(t, err)

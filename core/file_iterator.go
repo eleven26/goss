@@ -1,31 +1,36 @@
 package core
 
+// FileIterator is an iterator used to iterate over all objects in the cloud.
 type FileIterator interface {
+	// HasNext Determine if there is a next object.
 	HasNext() bool
+
+	// Next Get the next object.
 	Next() (File, error)
+
+	// All Get all objects.
 	All() ([]File, error)
+
+	// GetNextChunk Get the next batch of objects.
 	GetNextChunk() error
 }
 
+// Chunks is used to get the next "page" of objects.
 type Chunks interface {
 	Chunk(marker interface{}) (ListObjectResult, error)
 }
 
+// fileIterator is the iterator used to iterate over all matching objects.
 type fileIterator struct {
-	// 获取下一批数据的 marker
-	marker interface{}
-	// 获取下一批数据的函数
-	chunks Chunks
-	// ListObjects 的返回值
-	result ListObjectResult
-	// 当前获取的结果遍历到的下标
-	index int
-	// 当前已获取的结果的总条数
-	count int
-	// 是否已经获取完全部数据
-	isFinished bool
+	marker     interface{}      // used to get next "page".
+	chunks     Chunks           // provides next "page" for current iterator.
+	result     ListObjectResult // the return value of chunks
+	index      int              // the index of result
+	count      int              // the length of result
+	isFinished bool             // Whether all data has been obtained.
 }
 
+// NewFileIterator creates an instance of FileIterator.
 func NewFileIterator(marker interface{}, chunks Chunks) FileIterator {
 	return &fileIterator{
 		marker: marker,
@@ -33,11 +38,12 @@ func NewFileIterator(marker interface{}, chunks Chunks) FileIterator {
 	}
 }
 
-// HasNext 还没有获取完全部数据、没有遍历完所有获取到的数据
+// HasNext check if there is a next object.
 func (f *fileIterator) HasNext() bool {
 	return !f.isFinished || f.index < f.count
 }
 
+// Next get the next object.
 func (f *fileIterator) Next() (file File, err error) {
 	if !f.HasNext() {
 		return
@@ -57,6 +63,7 @@ func (f *fileIterator) Next() (file File, err error) {
 	return
 }
 
+// GetNextChunk get next "page" of objects.
 func (f *fileIterator) GetNextChunk() error {
 	result, err := f.chunks.Chunk(f.marker)
 	if err != nil {
@@ -76,6 +83,7 @@ func (f *fileIterator) GetNextChunk() error {
 	return nil
 }
 
+// All get all objects.
 func (f *fileIterator) All() ([]File, error) {
 	var res []File
 
