@@ -20,13 +20,17 @@ const (
 )
 
 var (
-	errorNoDefaultDriver = errors.New("no default driver set")
-	errorDriverNotExists = errors.New("driver not exists")
+	// ErrNoDefaultDriver no default driver configured error.
+	ErrNoDefaultDriver = errors.New("no default driver set")
+
+	// ErrDriverNotExists driver not registered error.
+	ErrDriverNotExists = errors.New("driver not exists")
 )
 
+// defaultDriver get the driver specified by "driver" in the configuration file.
 func defaultDriver() (core.Driver, error) {
 	if !viper.IsSet("driver") {
-		return nil, errorNoDefaultDriver
+		return nil, ErrNoDefaultDriver
 	}
 
 	driver := viper.GetString("driver")
@@ -41,6 +45,6 @@ func defaultDriver() (core.Driver, error) {
 	case Huawei:
 		return huawei.NewDriver(), nil
 	default:
-		return nil, errorDriverNotExists
+		return nil, ErrDriverNotExists
 	}
 }

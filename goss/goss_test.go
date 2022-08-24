@@ -43,5 +43,5 @@ func TestNew(t *testing.T) {
 	viper.Set("driver", "not_exists")
 	goss, err = New(configPath)
 	assert.NotNil(t, err)
-	assert.ErrorIs(t, err, errorDriverNotExists)
+	assert.ErrorIs(t, err, ErrDriverNotExists)
 }
