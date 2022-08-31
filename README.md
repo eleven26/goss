@@ -91,8 +91,9 @@ import "github.com/eleven26/goss/goss"
 ```go
 // path 是配置文件的路径
 path := "./goss.yml"
+goss, err := goss.New(path)
 // storage 是云存储对象
-storage := goss.Storage(path)
+storage := goss.Storage
 ```
 
 3. 使用
