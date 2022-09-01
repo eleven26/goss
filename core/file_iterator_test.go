@@ -80,35 +80,82 @@ func (c *ChunksStub) Chunk(marker interface{}) (ListObjectResult, error) {
 	return args.Get(0).(ListObjectResult), args.Error(1)
 }
 
-func TestNewFileIterator(t *testing.T) {
-	it := NewFileIterator("", new(ChunksStub))
+//func TestNewFileIterator(t *testing.T) {
+//	it := NewFileIterator("", new(ChunksStub))
+//
+//	assert.True(t, it.HasNext())
+//}
 
-	assert.True(t, it.HasNext())
-}
-
-func TestGetNextChunk(t *testing.T) {
-	file := new(FileStub)
-
-	result1 := new(ResultStub)
-	result1.On("Len").Return(1)
-	result1.On("IsTruncated").Return(false)
-	result1.AssertNotCalled(t, "NextMarker")
-	result1.On("Get", 0).Return(file)
+func TestNotHasNext(t *testing.T) {
+	result := new(ResultStub)
+	result.On("Len").Return(0)
+	result.On("IsTruncated").Return(false)
 
 	chunks := new(ChunksStub)
-	chunks.On("Chunk", "a").Return(result1, nil)
+	chunks.On("Chunk", "first").Return(result, nil)
 
 	fi := fileIterator{
-		marker: "a",
+		marker: "first",
+		chunks: chunks,
+	}
+	assert.False(t, fi.HasNext())
+
+	result.AssertExpectations(t)
+	chunks.AssertExpectations(t)
+}
+
+func TestHasNext(t *testing.T) {
+	result := new(ResultStub)
+	result.On("Len").Return(1)
+	result.On("IsTruncated").Return(false)
+
+	chunks := new(ChunksStub)
+	chunks.On("Chunk", "first").Return(result, nil)
+
+	fi := fileIterator{
+		marker: "first",
 		chunks: chunks,
 	}
 	assert.True(t, fi.HasNext())
 
-	files, err := fi.All()
-	assert.Nil(t, err)
-	assert.Len(t, files, 1)
-	assert.Equal(t, file, files[0])
-
-	result1.AssertExpectations(t)
+	result.AssertExpectations(t)
 	chunks.AssertExpectations(t)
+}
+
+func TestNotHasNext1(t *testing.T) {
+	fi := fileIterator{
+		index: 100,
+		count: 100,
+	}
+	assert.True(t, fi.HasNext())
+
+	fi = fileIterator{
+		index:      100,
+		count:      100,
+		isFinished: true,
+	}
+	assert.False(t, fi.HasNext())
+}
+
+func TestGetNextChunk(t *testing.T) {
+	result := new(ResultStub)
+	result.On("Len").Return(1)
+	result.On("IsTruncated").Return(false)
+
+	chunks := new(ChunksStub)
+	chunks.On("Chunk", "first").Return(result, nil)
+
+	fi := fileIterator{
+		marker: "first",
+		chunks: chunks,
+	}
+	err := fi.GetNextChunk()
+	assert.Nil(t, err)
+
+	result.AssertExpectations(t)
+	chunks.AssertExpectations(t)
+}
+
+func TestAll(t *testing.T) {
+
 }
