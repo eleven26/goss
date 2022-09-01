@@ -164,7 +164,7 @@ fmt.Println(content)
 从云存储获取文件，返回字符串。参数是 key。返回值是 `[]byte` 和 `error`
 
 ```go
-bs, err := storage.Get("test/test.txt")
+bs, err := storage.GetBytes("test/test.txt")
 fmt.Println(string(bs))
 ```
 
