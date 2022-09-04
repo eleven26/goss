@@ -74,7 +74,10 @@ func (f *fileIterator) Next() (file File, err error) {
 
 // GetNextChunk get next "page" of objects.
 func (f *fileIterator) GetNextChunk() error {
-	result, err := f.chunks.Chunk(f.marker)
+	return f.handleChunkResult(f.chunks.Chunk(f.marker))
+}
+
+func (f *fileIterator) handleChunkResult(result ListObjectResult, err error) error {
 	if err != nil {
 		return err
 	}
@@ -83,7 +86,7 @@ func (f *fileIterator) GetNextChunk() error {
 	f.count = result.Len()
 	f.result = result
 
-	if f.result.IsTruncated() {
+	if result.IsTruncated() {
 		f.marker = result.NextMarker()
 	} else {
 		f.isFinished = true

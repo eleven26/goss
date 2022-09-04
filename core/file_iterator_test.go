@@ -1,6 +1,7 @@
 package core
 
 import (
+	"errors"
 	"testing"
 	"time"
 
@@ -154,6 +155,47 @@ func TestGetNextChunk(t *testing.T) {
 
 	result.AssertExpectations(t)
 	chunks.AssertExpectations(t)
+}
+
+func TestHandleChunkResult(t *testing.T) {
+	result := new(ResultStub)
+	err := errors.New("foo")
+	fi := fileIterator{}
+	assert.ErrorIs(t, fi.handleChunkResult(result, err), err)
+
+	result = new(ResultStub)
+	result.On("Len").Return(10)
+	result.On("IsTruncated").Return(false)
+	fi = fileIterator{
+		index:      10,
+		count:      20,
+		result:     nil,
+		isFinished: false,
+	}
+	err = fi.handleChunkResult(result, nil)
+	assert.Nil(t, err)
+	assert.Equal(t, 0, fi.index)
+	assert.Equal(t, 10, fi.count)
+	assert.Equal(t, result, fi.result)
+	assert.True(t, fi.isFinished)
+
+	result = new(ResultStub)
+	result.On("Len").Return(1)
+	result.On("IsTruncated").Return(true)
+	result.On("NextMarker").Return("foo")
+	fi = fileIterator{
+		index:      10,
+		count:      20,
+		result:     nil,
+		isFinished: false,
+	}
+	err = fi.handleChunkResult(result, nil)
+	assert.Nil(t, err)
+	assert.Equal(t, 0, fi.index)
+	assert.Equal(t, 1, fi.count)
+	assert.Equal(t, result, fi.result)
+	assert.False(t, fi.isFinished)
+	assert.Equal(t, "foo", fi.marker)
 }
 
 func TestAll(t *testing.T) {
