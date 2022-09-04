@@ -40,6 +40,10 @@ func NewFileIterator(marker interface{}, chunks Chunks) FileIterator {
 
 // HasNext check if there is a next object.
 func (f *fileIterator) HasNext() bool {
+	if f.isFinished {
+		return false
+	}
+
 	if f.count == 0 {
 		err := f.GetNextChunk()
 		if err != nil {
@@ -49,7 +53,7 @@ func (f *fileIterator) HasNext() bool {
 		return f.count > 0
 	}
 
-	return !f.isFinished || f.index < f.count
+	return f.index < f.count
 }
 
 // Next get the next object.

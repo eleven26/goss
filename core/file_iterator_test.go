@@ -128,7 +128,7 @@ func TestNotHasNext1(t *testing.T) {
 		index: 100,
 		count: 100,
 	}
-	assert.True(t, fi.HasNext())
+	assert.False(t, fi.HasNext())
 
 	fi = fileIterator{
 		index:      100,
@@ -199,5 +199,21 @@ func TestHandleChunkResult(t *testing.T) {
 }
 
 func TestAll(t *testing.T) {
+	file := new(FileStub)
 
+	result := new(ResultStub)
+	result.On("Get", 0).Return(file)
+	result.On("Get", 1).Return(file)
+
+	fi := fileIterator{
+		index:  0,
+		count:  2,
+		result: result,
+		marker: "foo",
+	}
+	files, err := fi.All()
+	assert.Nil(t, err)
+	assert.Len(t, files, 2)
+
+	result.AssertExpectations(t)
 }
