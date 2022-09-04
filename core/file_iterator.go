@@ -44,7 +44,7 @@ func (f *fileIterator) HasNext() bool {
 		return false
 	}
 
-	if f.count == 0 {
+	if (f.index == 0 && f.count == 0) || f.index == f.count {
 		err := f.GetNextChunk()
 		if err != nil {
 			return false
@@ -60,13 +60,6 @@ func (f *fileIterator) HasNext() bool {
 func (f *fileIterator) Next() (file File, err error) {
 	if !f.HasNext() {
 		return
-	}
-
-	if f.index >= f.count {
-		err = f.GetNextChunk()
-		if err != nil {
-			return
-		}
 	}
 
 	file = f.result.Get(f.index)

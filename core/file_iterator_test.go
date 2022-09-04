@@ -126,9 +126,18 @@ func TestHasNext(t *testing.T) {
 }
 
 func TestNotHasNext1(t *testing.T) {
+	emptyResult := new(ResultStub)
+	emptyResult.On("Len").Return(0)
+	emptyResult.On("IsTruncated").Return(false)
+
+	chunks := new(ChunksStub)
+	chunks.On("Chunk", "foo").Return(emptyResult, nil)
+
 	fi := fileIterator{
-		index: 100,
-		count: 100,
+		index:  100,
+		count:  100,
+		marker: "foo",
+		chunks: chunks,
 	}
 	assert.False(t, fi.HasNext())
 
@@ -207,11 +216,19 @@ func TestAll(t *testing.T) {
 	result.On("Get", 0).Return(file)
 	result.On("Get", 1).Return(file)
 
+	emptyResult := new(ResultStub)
+	emptyResult.On("Len").Return(0)
+	emptyResult.On("IsTruncated").Return(false)
+
+	chunks := new(ChunksStub)
+	chunks.On("Chunk", "foo").Return(emptyResult, nil)
+
 	fi := fileIterator{
 		index:  0,
 		count:  2,
 		result: result,
 		marker: "foo",
+		chunks: chunks,
 	}
 	files, err := fi.All()
 	assert.Nil(t, err)
