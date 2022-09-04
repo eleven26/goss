@@ -81,11 +81,13 @@ func (c *ChunksStub) Chunk(marker interface{}) (ListObjectResult, error) {
 	return args.Get(0).(ListObjectResult), args.Error(1)
 }
 
-//func TestNewFileIterator(t *testing.T) {
-//	it := NewFileIterator("", new(ChunksStub))
-//
-//	assert.True(t, it.HasNext())
-//}
+func TestNewFileIterator(t *testing.T) {
+	chunks := new(ChunksStub)
+	fi := NewFileIterator("foo", chunks)
+
+	assert.Equal(t, "foo", fi.(*fileIterator).marker)
+	assert.Equal(t, chunks, fi.(*fileIterator).chunks)
+}
 
 func TestNotHasNext(t *testing.T) {
 	result := new(ResultStub)
