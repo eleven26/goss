@@ -22,12 +22,13 @@ type Chunks interface {
 
 // fileIterator is the iterator used to iterate over all matching objects.
 type fileIterator struct {
-	marker     interface{}      // used to get next "page".
-	chunks     Chunks           // provides next "page" for current iterator.
-	result     ListObjectResult // the return value of chunks
-	index      int              // the index of result
-	count      int              // the length of result
-	isFinished bool             // Whether all data has been obtained.
+	marker      interface{}      // used to get next "page".
+	chunks      Chunks           // provides next "page" for current iterator.
+	result      ListObjectResult // the return value of chunks
+	index       int              // the index of result
+	count       int              // the length of result
+	isFinished  bool             // Whether all data has been obtained.
+	chunksCount int              // counter for Chunks.Chunk
 }
 
 // NewFileIterator creates an instance of FileIterator.
@@ -40,17 +41,25 @@ func NewFileIterator(marker interface{}, chunks Chunks) FileIterator {
 
 // HasNext check if there is a next object.
 func (f *fileIterator) HasNext() bool {
-	if f.isFinished {
-		return false
-	}
-
-	if (f.index == 0 && f.count == 0) || f.index == f.count {
+	// No chunk have been got.
+	if f.chunksCount == 0 {
 		err := f.GetNextChunk()
 		if err != nil {
 			return false
 		}
+	}
 
-		return f.count > 0
+	// No more chunks.
+	if f.isFinished {
+		return f.index < f.count
+	}
+
+	// Get next "page".
+	if f.index == f.count {
+		err := f.GetNextChunk()
+		if err != nil {
+			return false
+		}
 	}
 
 	return f.index < f.count
@@ -71,6 +80,7 @@ func (f *fileIterator) Next() (file File, err error) {
 
 // GetNextChunk get next "page" of objects.
 func (f *fileIterator) GetNextChunk() error {
+	f.chunksCount++
 	return f.handleChunkResult(f.chunks.Chunk(f.marker))
 }
 
