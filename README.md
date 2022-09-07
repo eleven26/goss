@@ -208,3 +208,10 @@ exists, err := storage.Files("test/")
 ```go
 size, err := storage.Size("test/test.txt")
 ```
+
+## 参考文档
+
+1. [阿里云对象存储](https://help.aliyun.com/product/31815.html)
+2. [腾讯云对象存储](https://cloud.tencent.com/document/product/436)
+3. [七牛云对象存储](https://developer.qiniu.com/kodo)
+4. [华为云对象存储](https://support.huaweicloud.com/obs/index.html)
