@@ -70,5 +70,5 @@ func (c *Chunks) Chunk() (core.ListObjectResult, error) {
 	c.count++
 	c.nextMarker = result.NextMarker
 
-	return &ListObjectResult{ossResult: result}, err
+	return NewListObjectResult(result), err
 }

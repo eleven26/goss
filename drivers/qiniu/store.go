@@ -153,9 +153,5 @@ func (c *Chunks) Chunk() (core.ListObjectResult, error) {
 
 	c.nextMarker = nextMarker
 
-	return &ListObjectResult{
-		entries:    entries,
-		nextMarker: nextMarker,
-		hasNext:    hasNext,
-	}, nil
+	return NewListObjectResult(entries, nextMarker, hasNext), nil
 }

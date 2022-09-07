@@ -1,7 +1,5 @@
 package core
 
-import "strings"
-
 // FileIterator is an iterator used to iterate over all objects in the cloud.
 type FileIterator interface {
 	// HasNext Determine if there is a next object.
@@ -24,12 +22,13 @@ type Chunks interface {
 
 // fileIterator is the iterator used to iterate over all matching objects.
 type fileIterator struct {
-	chunks      Chunks           // provides next "page" for current iterator.
-	result      ListObjectResult // the return value of chunks
-	index       int              // the index of result
-	count       int              // the length of result
-	isFinished  bool             // Whether all data has been obtained.
-	chunksCount int              // counter for Chunks.Chunk
+	chunks      Chunks // provides next "page" for current iterator.
+	index       int    // the index of result
+	count       int    // the length of result
+	isFinished  bool   // Whether all data has been obtained.
+	chunksCount int    // counter for Chunks.Chunk
+
+	files []File
 }
 
 // NewFileIterator creates an instance of FileIterator.
@@ -71,7 +70,7 @@ func (f *fileIterator) Next() (file File, err error) {
 		return
 	}
 
-	file = f.result.Get(f.index)
+	file = f.files[f.index]
 
 	f.index++
 
@@ -91,7 +90,7 @@ func (f *fileIterator) handleChunkResult(result ListObjectResult, err error) err
 
 	f.index = 0
 	f.count = result.Len()
-	f.result = result
+	f.files = result.Files()
 	f.isFinished = result.IsFinished()
 
 	return nil
@@ -106,10 +105,6 @@ func (f *fileIterator) All() ([]File, error) {
 			file, err := f.Next()
 			if err != nil {
 				return res, err
-			}
-
-			if strings.HasSuffix(file.Key(), "/") {
-				continue
 			}
 
 			res = append(res, file)

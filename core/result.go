@@ -8,6 +8,6 @@ type ListObjectResult interface {
 	// IsFinished is used to check if the result is finished.
 	IsFinished() bool
 
-	// Get file in result by index.
-	Get(index int) File
+	// Files return all files of the result.
+	Files() []File
 }
