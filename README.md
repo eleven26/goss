@@ -99,8 +99,8 @@ storage := goss.Storage
 3. 使用
 
 ```go
-// storage.Get 会获取路径指定的文件，返回字符串
-fmt.Println(storage.Get("test/foo.txt"))
+// storage.GetString 会获取路径指定的文件，返回字符串
+fmt.Println(storage.GetString("test/foo.txt"))
 ```
 
 
