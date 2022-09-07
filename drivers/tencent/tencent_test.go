@@ -5,7 +5,6 @@ package tencent
 import (
 	"context"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -120,7 +119,7 @@ func TestGet(t *testing.T) {
 	}(rc)
 	assert.Nil(t, err)
 
-	bs, err := ioutil.ReadAll(rc)
+	bs, err := io.ReadAll(rc)
 	assert.Nil(t, err)
 	assert.Equal(t, string(bs), "foo")
 

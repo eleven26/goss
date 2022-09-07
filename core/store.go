@@ -15,9 +15,6 @@ type Store interface {
 	// Get gets the content of the object named key in cloud storage.
 	Get(key string) (io.ReadCloser, error)
 
-	// SaveToFile gets the content of the object named key in cloud storage and saves it to localPath.
-	SaveToFile(key string, localPath string) error
-
 	// Delete deletes the contents of the file pointed to by key.
 	Delete(key string) error
 

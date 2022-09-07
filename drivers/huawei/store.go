@@ -47,10 +47,6 @@ func (s *Store) Get(key string) (io.ReadCloser, error) {
 	return output.Body, err
 }
 
-func (s *Store) SaveToFile(key string, localPath string) error {
-	panic("deprecated")
-}
-
 func (s *Store) Delete(key string) error {
 	input := &obs.DeleteObjectInput{}
 	input.Bucket = s.config.Bucket

@@ -3,7 +3,7 @@
 package qiniu
 
 import (
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -115,7 +115,7 @@ func TestGet(t *testing.T) {
 	rc, err := storage2.Get(key)
 	assert.Nil(t, err)
 
-	bs, err := ioutil.ReadAll(rc)
+	bs, err := io.ReadAll(rc)
 	assert.Nil(t, err)
 	assert.Equal(t, "foo", string(bs))
 }

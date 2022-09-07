@@ -25,10 +25,6 @@ func (s *Store) Get(key string) (io.ReadCloser, error) {
 	return s.Bucket.GetObject(key)
 }
 
-func (s *Store) SaveToFile(key string, localPath string) error {
-	panic("deprecated")
-}
-
 func (s *Store) Delete(key string) error {
 	return s.Bucket.DeleteObject(key)
 }

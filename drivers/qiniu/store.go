@@ -115,10 +115,6 @@ func (s *Store) Size(key string) (int64, error) {
 	return fi.Fsize, nil
 }
 
-func (s *Store) SaveToFile(key string, localPath string) error {
-	panic("deprecated")
-}
-
 func (s *Store) Exists(key string) (bool, error) {
 	_, err := s.meta(key)
 	if err != nil {

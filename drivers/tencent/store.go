@@ -49,10 +49,6 @@ func (s *Store) Get(key string) (io.ReadCloser, error) {
 	return resp.Body, nil
 }
 
-func (s *Store) SaveToFile(key string, localPath string) error {
-	panic("deprecated")
-}
-
 func (s *Store) Delete(key string) error {
 	_, err := s.client.Object.Delete(context.Background(), key)
 

@@ -146,7 +146,7 @@ err := storage.PutFromFile("test/test.txt", "/path/to/test.txt")
 rc, err := storage.Get("test/test.txt")
 defer rc.Close()
 
-bs, err := ioutil.ReadAll(rc)
+bs, err := io.ReadAll(rc)
 fmt.Println(string(bs))
 ```
 
