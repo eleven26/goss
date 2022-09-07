@@ -212,6 +212,7 @@ func TestHandleChunkResult(t *testing.T) {
 
 func TestAll(t *testing.T) {
 	file := new(FileStub)
+	file.On("Key").Return("foo")
 
 	result := new(ResultStub)
 	result.On("Get", 0).Return(file)

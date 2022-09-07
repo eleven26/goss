@@ -1,5 +1,7 @@
 package core
 
+import "strings"
+
 // FileIterator is an iterator used to iterate over all objects in the cloud.
 type FileIterator interface {
 	// HasNext Determine if there is a next object.
@@ -111,6 +113,10 @@ func (f *fileIterator) All() ([]File, error) {
 			file, err := f.Next()
 			if err != nil {
 				return res, err
+			}
+
+			if strings.HasSuffix(file.Key(), "/") {
+				continue
 			}
 
 			res = append(res, file)
