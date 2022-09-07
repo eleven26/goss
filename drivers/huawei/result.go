@@ -8,24 +8,21 @@ import (
 )
 
 type ListObjectResult struct {
-	output *obs.ListObjectsOutput
-	files  []core.File
+	files      []core.File
+	isFinished bool
 }
 
 func NewListObjectResult(output *obs.ListObjectsOutput) core.ListObjectResult {
-	result := ListObjectResult{
-		output: output,
+	return &ListObjectResult{
+		files:      getFiles(output.Contents),
+		isFinished: !output.IsTruncated,
 	}
-
-	result.files = result.getFiles()
-
-	return &result
 }
 
-func (l *ListObjectResult) getFiles() []core.File {
+func getFiles(contents []obs.Content) []core.File {
 	var files []core.File
 
-	for _, content := range l.output.Contents {
+	for _, content := range contents {
 		if strings.HasSuffix(content.Key, "/") {
 			continue
 		}
@@ -45,5 +42,5 @@ func (l *ListObjectResult) Len() int {
 }
 
 func (l *ListObjectResult) IsFinished() bool {
-	return !l.output.IsTruncated
+	return l.isFinished
 }

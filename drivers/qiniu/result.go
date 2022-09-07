@@ -8,28 +8,21 @@ import (
 )
 
 type ListObjectResult struct {
-	entries    []storage.ListItem
-	nextMarker string
-	hasNext    bool
 	files      []core.File
+	isFinished bool
 }
 
-func NewListObjectResult(entries []storage.ListItem, nextMarker string, hasNext bool) core.ListObjectResult {
-	result := ListObjectResult{
-		entries:    entries,
-		nextMarker: nextMarker,
-		hasNext:    hasNext,
+func NewListObjectResult(entries []storage.ListItem, hasNext bool) core.ListObjectResult {
+	return &ListObjectResult{
+		isFinished: !hasNext,
+		files:      getFiles(entries),
 	}
-
-	result.files = result.getFiles()
-
-	return &result
 }
 
-func (l *ListObjectResult) getFiles() []core.File {
+func getFiles(entries []storage.ListItem) []core.File {
 	var files []core.File
 
-	for _, item := range l.entries {
+	for _, item := range entries {
 		if strings.HasSuffix(item.Key, "/") {
 			continue
 		}
@@ -49,5 +42,5 @@ func (l *ListObjectResult) Len() int {
 }
 
 func (l *ListObjectResult) IsFinished() bool {
-	return !l.hasNext
+	return l.isFinished
 }
