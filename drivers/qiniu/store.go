@@ -65,7 +65,7 @@ func (s *Store) PutFromFile(key string, localPath string) error {
 	return formUploader.PutFile(context.Background(), &ret, upToken, key, localPath, nil)
 }
 
-func (s Store) Get(key string) (io.ReadCloser, error) {
+func (s *Store) Get(key string) (io.ReadCloser, error) {
 	url := s.getDownloadUrl(key)
 
 	return s.getUrlContent(url)
@@ -119,7 +119,7 @@ func (s *Store) SaveToFile(key string, localPath string) error {
 	panic("deprecated")
 }
 
-func (s Store) Exists(key string) (bool, error) {
+func (s *Store) Exists(key string) (bool, error) {
 	_, err := s.meta(key)
 	if err != nil {
 		return false, err
@@ -133,7 +133,7 @@ func (s *Store) Delete(key string) error {
 }
 
 func (s *Store) Iterator(dir string) core.FileIterator {
-	return core.NewFileIterator(dir, &Chunks{
+	return core.NewFileIterator(&Chunks{
 		bucket:        s.config.Bucket,
 		bucketManager: s.bucketManager,
 		prefix:        dir,
@@ -147,7 +147,7 @@ type Chunks struct {
 	nextMarker    string
 }
 
-func (c *Chunks) Chunk(marker interface{}) (core.ListObjectResult, error) {
+func (c *Chunks) Chunk() (core.ListObjectResult, error) {
 	entries, _, nextMarker, hasNext, err := c.bucketManager.ListFiles(c.bucket, c.prefix, "", c.nextMarker, 100)
 	if err != nil {
 		return nil, err

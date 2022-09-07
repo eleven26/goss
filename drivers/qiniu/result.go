@@ -15,12 +15,8 @@ func (l *ListObjectResult) Len() int {
 	return len(l.entries)
 }
 
-func (l *ListObjectResult) IsTruncated() bool {
-	return l.hasNext
-}
-
-func (l *ListObjectResult) NextMarker() interface{} {
-	return l.nextMarker
+func (l *ListObjectResult) IsFinished() bool {
+	return !l.hasNext
 }
 
 func (l *ListObjectResult) Get(index int) core.File {

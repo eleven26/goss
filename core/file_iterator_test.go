@@ -53,7 +53,7 @@ func (r *ResultStub) Len() int {
 	return args.Int(0)
 }
 
-func (r *ResultStub) IsTruncated() bool {
+func (r *ResultStub) IsFinished() bool {
 	args := r.Called()
 
 	return args.Bool(0)
@@ -73,32 +73,32 @@ func (r *ResultStub) Get(index int) File {
 
 type ChunksStub struct {
 	mock.Mock
+	marker string
 }
 
-func (c *ChunksStub) Chunk(marker interface{}) (ListObjectResult, error) {
-	args := c.Called(marker)
+func (c *ChunksStub) Chunk() (ListObjectResult, error) {
+	args := c.Called()
 
 	return args.Get(0).(ListObjectResult), args.Error(1)
 }
 
 func TestNewFileIterator(t *testing.T) {
 	chunks := new(ChunksStub)
-	fi := NewFileIterator("foo", chunks)
+	chunks.marker = "foo"
+	fi := NewFileIterator(chunks)
 
-	assert.Equal(t, "foo", fi.(*fileIterator).marker)
 	assert.Equal(t, chunks, fi.(*fileIterator).chunks)
 }
 
 func TestNotHasNext(t *testing.T) {
 	result := new(ResultStub)
 	result.On("Len").Return(0)
-	result.On("IsTruncated").Return(false)
+	result.On("IsFinished").Return(false)
 
 	chunks := new(ChunksStub)
-	chunks.On("Chunk", "first").Return(result, nil)
+	chunks.On("Chunk").Return(result, nil)
 
 	fi := fileIterator{
-		marker: "first",
 		chunks: chunks,
 	}
 	assert.False(t, fi.HasNext())
@@ -110,13 +110,12 @@ func TestNotHasNext(t *testing.T) {
 func TestHasNext(t *testing.T) {
 	result := new(ResultStub)
 	result.On("Len").Return(1)
-	result.On("IsTruncated").Return(false)
+	result.On("IsFinished").Return(false)
 
 	chunks := new(ChunksStub)
-	chunks.On("Chunk", "first").Return(result, nil)
+	chunks.On("Chunk").Return(result, nil)
 
 	fi := fileIterator{
-		marker: "first",
 		chunks: chunks,
 	}
 	assert.True(t, fi.HasNext())
@@ -128,15 +127,14 @@ func TestHasNext(t *testing.T) {
 func TestNotHasNext1(t *testing.T) {
 	emptyResult := new(ResultStub)
 	emptyResult.On("Len").Return(0)
-	emptyResult.On("IsTruncated").Return(false)
+	emptyResult.On("IsFinished").Return(false)
 
 	chunks := new(ChunksStub)
-	chunks.On("Chunk", "foo").Return(emptyResult, nil)
+	chunks.On("Chunk").Return(emptyResult, nil)
 
 	fi := fileIterator{
 		index:  100,
 		count:  100,
-		marker: "foo",
 		chunks: chunks,
 	}
 	assert.False(t, fi.HasNext())
@@ -153,13 +151,12 @@ func TestNotHasNext1(t *testing.T) {
 func TestGetNextChunk(t *testing.T) {
 	result := new(ResultStub)
 	result.On("Len").Return(1)
-	result.On("IsTruncated").Return(false)
+	result.On("IsFinished").Return(false)
 
 	chunks := new(ChunksStub)
-	chunks.On("Chunk", "first").Return(result, nil)
+	chunks.On("Chunk").Return(result, nil)
 
 	fi := fileIterator{
-		marker: "first",
 		chunks: chunks,
 	}
 	err := fi.GetNextChunk()
@@ -177,37 +174,34 @@ func TestHandleChunkResult(t *testing.T) {
 
 	result = new(ResultStub)
 	result.On("Len").Return(10)
-	result.On("IsTruncated").Return(false)
+	result.On("IsFinished").Return(false)
 	fi = fileIterator{
-		index:      10,
-		count:      20,
-		result:     nil,
-		isFinished: false,
+		index:  10,
+		count:  20,
+		result: nil,
 	}
 	err = fi.handleChunkResult(result, nil)
 	assert.Nil(t, err)
 	assert.Equal(t, 0, fi.index)
 	assert.Equal(t, 10, fi.count)
 	assert.Equal(t, result, fi.result)
-	assert.True(t, fi.isFinished)
+	assert.False(t, fi.isFinished)
 
 	result = new(ResultStub)
 	result.On("Len").Return(1)
-	result.On("IsTruncated").Return(true)
+	result.On("IsFinished").Return(true)
 	result.On("NextMarker").Return("foo")
 	fi = fileIterator{
-		index:      10,
-		count:      20,
-		result:     nil,
-		isFinished: false,
+		index:  10,
+		count:  20,
+		result: nil,
 	}
 	err = fi.handleChunkResult(result, nil)
 	assert.Nil(t, err)
 	assert.Equal(t, 0, fi.index)
 	assert.Equal(t, 1, fi.count)
 	assert.Equal(t, result, fi.result)
-	assert.False(t, fi.isFinished)
-	assert.Equal(t, "foo", fi.marker)
+	assert.True(t, fi.isFinished)
 }
 
 func TestAll(t *testing.T) {
@@ -218,16 +212,15 @@ func TestAll(t *testing.T) {
 	result.On("Get", 0).Return(file)
 	result.On("Get", 1).Return(file)
 	result.On("Len").Return(2)
-	result.On("IsTruncated").Return(false)
+	result.On("IsFinished").Return(true)
 
 	chunks := new(ChunksStub)
-	chunks.On("Chunk", "foo").Return(result, nil)
+	chunks.On("Chunk").Return(result, nil)
 
 	fi := fileIterator{
 		index:       0,
 		count:       2,
 		result:      result,
-		marker:      "foo",
 		chunks:      chunks,
 		chunksCount: 0,
 	}

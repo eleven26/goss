@@ -2,7 +2,6 @@ package aliyun
 
 import (
 	"io"
-	"reflect"
 	"strconv"
 
 	"github.com/eleven26/goss/core"
@@ -50,23 +49,28 @@ func (s *Store) Exists(key string) (bool, error) {
 }
 
 func (s *Store) Iterator(dir string) core.FileIterator {
-	return core.NewFileIterator(oss.Prefix(dir), &Chunks{prefix: dir, bucket: s.Bucket})
+	return core.NewFileIterator(&Chunks{prefix: dir, bucket: s.Bucket})
 }
 
 type Chunks struct {
-	prefix string
-	bucket *oss.Bucket
+	count      int64
+	prefix     string
+	nextMarker string
+	bucket     *oss.Bucket
 }
 
-func (c *Chunks) Chunk(marker interface{}) (core.ListObjectResult, error) {
+func (c *Chunks) Chunk() (core.ListObjectResult, error) {
 	var result oss.ListObjectsResult
 	var err error
 
-	if reflect.TypeOf(marker).String() == "string" {
-		result, err = c.bucket.ListObjects(oss.Marker(marker.(string)), oss.Prefix(c.prefix))
+	if c.count == 0 {
+		result, err = c.bucket.ListObjects(oss.Prefix(c.prefix))
 	} else {
-		result, err = c.bucket.ListObjects(marker.(oss.Option))
+		result, err = c.bucket.ListObjects(oss.Prefix(c.prefix), oss.Marker(c.nextMarker))
 	}
+
+	c.count++
+	c.nextMarker = result.NextMarker
 
 	return &ListObjectResult{ossResult: result}, err
 }

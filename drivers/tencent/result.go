@@ -13,12 +13,8 @@ func (l *ListObjectResult) Len() int {
 	return len(l.result.Contents)
 }
 
-func (l *ListObjectResult) IsTruncated() bool {
-	return l.result.IsTruncated
-}
-
-func (l *ListObjectResult) NextMarker() interface{} {
-	return l.result.NextMarker
+func (l *ListObjectResult) IsFinished() bool {
+	return !l.result.IsTruncated
 }
 
 func (l *ListObjectResult) Get(index int) core.File {

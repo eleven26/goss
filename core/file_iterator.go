@@ -19,12 +19,11 @@ type FileIterator interface {
 
 // Chunks is used to get the next "page" of objects.
 type Chunks interface {
-	Chunk(marker interface{}) (ListObjectResult, error)
+	Chunk() (ListObjectResult, error)
 }
 
 // fileIterator is the iterator used to iterate over all matching objects.
 type fileIterator struct {
-	marker      interface{}      // used to get next "page".
 	chunks      Chunks           // provides next "page" for current iterator.
 	result      ListObjectResult // the return value of chunks
 	index       int              // the index of result
@@ -34,9 +33,8 @@ type fileIterator struct {
 }
 
 // NewFileIterator creates an instance of FileIterator.
-func NewFileIterator(marker interface{}, chunks Chunks) FileIterator {
+func NewFileIterator(chunks Chunks) FileIterator {
 	return &fileIterator{
-		marker: marker,
 		chunks: chunks,
 	}
 }
@@ -83,7 +81,7 @@ func (f *fileIterator) Next() (file File, err error) {
 // GetNextChunk get next "page" of objects.
 func (f *fileIterator) GetNextChunk() error {
 	f.chunksCount++
-	return f.handleChunkResult(f.chunks.Chunk(f.marker))
+	return f.handleChunkResult(f.chunks.Chunk())
 }
 
 func (f *fileIterator) handleChunkResult(result ListObjectResult, err error) error {
@@ -94,12 +92,7 @@ func (f *fileIterator) handleChunkResult(result ListObjectResult, err error) err
 	f.index = 0
 	f.count = result.Len()
 	f.result = result
-
-	if result.IsTruncated() {
-		f.marker = result.NextMarker()
-	} else {
-		f.isFinished = true
-	}
+	f.isFinished = result.IsFinished()
 
 	return nil
 }

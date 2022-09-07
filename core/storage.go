@@ -2,7 +2,6 @@ package core
 
 import (
 	"io"
-	"io/ioutil"
 	"os"
 )
 
@@ -89,7 +88,7 @@ func (s *storage) GetBytes(key string) (bytes []byte, err error) {
 		err = rc.Close()
 	}()
 
-	return ioutil.ReadAll(rc)
+	return io.ReadAll(rc)
 }
 
 // GetToFile saves the file pointed to by key to the localPath.

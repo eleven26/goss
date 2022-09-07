@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"io"
-	"io/ioutil"
 	"net/http"
 
 	"github.com/eleven26/goss/core"
@@ -73,15 +72,15 @@ func (s *Store) Exists(key string) (bool, error) {
 	return s.client.Object.IsExist(context.Background(), key)
 }
 
-func (s *Store) Iterator(dir string) core.FileIterator {
-	return core.NewFileIterator(dir, &Chunks{
-		dir:    dir,
+func (s *Store) Iterator(prefix string) core.FileIterator {
+	return core.NewFileIterator(&Chunks{
+		prefix: prefix,
 		bucket: s.client.Bucket,
 	})
 }
 
 func httpError(response *cos.Response) error {
-	bytes, err := ioutil.ReadAll(response.Body)
+	bytes, err := io.ReadAll(response.Body)
 	defer func() {
 		err = response.Body.Close()
 	}()
@@ -93,24 +92,33 @@ func httpError(response *cos.Response) error {
 }
 
 type Chunks struct {
-	dir    string
-	bucket *cos.BucketService
+	count      int
+	prefix     string
+	nextMarker string
+	bucket     *cos.BucketService
 }
 
-func (c *Chunks) Chunk(marker interface{}) (core.ListObjectResult, error) {
+func (c *Chunks) Chunk() (core.ListObjectResult, error) {
+	var opt cos.BucketGetOptions
 	var result *cos.BucketGetResult
 	var err error
 
-	if opt, ok := marker.(*cos.BucketGetOptions); ok {
-		result, _, err = c.bucket.Get(context.Background(), opt)
+	// 参考文档：https://cloud.tencent.com/document/product/436/7734
+	// 单次返回最大的条目数量，默认值为1000，最大为1000
+	// BucketGetOptions.MaxKeys 可以设置单次获取的条目数量
+	if c.count == 0 {
+		opt = cos.BucketGetOptions{Prefix: c.prefix}
 	} else {
-		opt = &cos.BucketGetOptions{Prefix: c.dir}
-		result, _, err = c.bucket.Get(context.Background(), opt)
+		opt = cos.BucketGetOptions{Prefix: c.prefix, Marker: c.nextMarker}
 	}
 
+	result, _, err = c.bucket.Get(context.Background(), &opt)
 	if err != nil {
 		return nil, err
 	}
+
+	c.count++
+	c.nextMarker = result.NextMarker
 
 	return &ListObjectResult{result: result}, nil
 }

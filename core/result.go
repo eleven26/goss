@@ -5,11 +5,8 @@ type ListObjectResult interface {
 	// Len is the length of current chunk.
 	Len() int
 
-	// IsTruncated is used to check if the result is truncated.
-	IsTruncated() bool
-
-	// NextMarker return the next marker of next "page".
-	NextMarker() interface{}
+	// IsFinished is used to check if the result is finished.
+	IsFinished() bool
 
 	// Get file in result by index.
 	Get(index int) File

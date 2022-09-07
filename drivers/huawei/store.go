@@ -97,7 +97,7 @@ func (s *Store) Exists(key string) (bool, error) {
 }
 
 func (s *Store) Iterator(dir string) core.FileIterator {
-	return core.NewFileIterator(dir, &Chunks{
+	return core.NewFileIterator(&Chunks{
 		bucket: s.config.Bucket,
 		client: s.client,
 		prefix: dir,
@@ -105,20 +105,25 @@ func (s *Store) Iterator(dir string) core.FileIterator {
 }
 
 type Chunks struct {
-	prefix string
-	bucket string
-	client *obs.ObsClient
+	prefix     string
+	nextMarker string
+	bucket     string
+	client     *obs.ObsClient
 }
 
-func (c *Chunks) Chunk(marker interface{}) (core.ListObjectResult, error) {
+func (c *Chunks) Chunk() (core.ListObjectResult, error) {
 	input := &obs.ListObjectsInput{}
 	input.Bucket = c.bucket
-	input.Marker = marker.(string)
+	input.Marker = c.nextMarker
 	input.Prefix = c.prefix
 
 	output, err := c.client.ListObjects(input)
 	if err != nil {
 		return nil, err
+	}
+
+	if output.IsTruncated {
+		c.nextMarker = output.NextMarker
 	}
 
 	return &ListObjectResult{
