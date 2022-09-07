@@ -201,3 +201,12 @@ func TestSize(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, siz, size)
 }
+
+func TestFilesWithMultiPage(t *testing.T) {
+	// Testdata was prepared before.
+	dir := "test_all/"
+
+	files, err := storage2.Files(dir)
+	assert.Nil(t, err)
+	assert.Len(t, files, 200)
+}

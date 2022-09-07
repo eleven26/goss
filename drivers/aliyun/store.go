@@ -50,10 +50,11 @@ func (s *Store) Exists(key string) (bool, error) {
 }
 
 func (s *Store) Iterator(dir string) core.FileIterator {
-	return core.NewFileIterator(oss.Prefix(dir), &Chunks{bucket: s.Bucket})
+	return core.NewFileIterator(oss.Prefix(dir), &Chunks{prefix: dir, bucket: s.Bucket})
 }
 
 type Chunks struct {
+	prefix string
 	bucket *oss.Bucket
 }
 
@@ -62,7 +63,7 @@ func (c *Chunks) Chunk(marker interface{}) (core.ListObjectResult, error) {
 	var err error
 
 	if reflect.TypeOf(marker).String() == "string" {
-		result, err = c.bucket.ListObjects(oss.Prefix(marker.(string)))
+		result, err = c.bucket.ListObjects(oss.Marker(marker.(string)), oss.Prefix(c.prefix))
 	} else {
 		result, err = c.bucket.ListObjects(marker.(oss.Option))
 	}

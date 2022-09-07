@@ -213,3 +213,12 @@ func TestFiles(t *testing.T) {
 	assert.Equal(t, "test/foo.txt", files[0].Key())
 	assert.Equal(t, expectedSize, files[0].Size())
 }
+
+func TestFilesWithMultiPage(t *testing.T) {
+	// Testdata was prepared before.
+	dir := "test_all/"
+
+	files, err := storage.Files(dir)
+	assert.Nil(t, err)
+	assert.Len(t, files, 200)
+}

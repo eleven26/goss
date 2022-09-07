@@ -100,10 +100,12 @@ func (s *Store) Iterator(dir string) core.FileIterator {
 	return core.NewFileIterator(dir, &Chunks{
 		bucket: s.config.Bucket,
 		client: s.client,
+		prefix: dir,
 	})
 }
 
 type Chunks struct {
+	prefix string
 	bucket string
 	client *obs.ObsClient
 }
@@ -112,6 +114,7 @@ func (c *Chunks) Chunk(marker interface{}) (core.ListObjectResult, error) {
 	input := &obs.ListObjectsInput{}
 	input.Bucket = c.bucket
 	input.Marker = marker.(string)
+	input.Prefix = c.prefix
 
 	output, err := c.client.ListObjects(input)
 	if err != nil {
