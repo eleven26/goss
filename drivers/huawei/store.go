@@ -117,6 +117,8 @@ func (c *Chunks) Chunk() (core.ListObjectResult, error) {
 	input.Marker = c.nextMarker
 	input.Prefix = c.prefix
 
+	// 参考文档：https://support.huaweicloud.com/sdk-android-devg-obs/obs_26_0603.html
+	// input.maxKeys 列举对象的最大数目，取值范围为1~1000，当超出范围时，按照默认的1000进行处理。
 	output, err := c.client.ListObjects(input)
 	if err != nil {
 		return nil, err
