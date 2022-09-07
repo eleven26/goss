@@ -2,6 +2,7 @@ package aliyun
 
 import (
 	"io"
+	"reflect"
 	"strconv"
 
 	"github.com/eleven26/goss/core"
@@ -57,7 +58,14 @@ type Chunks struct {
 }
 
 func (c *Chunks) Chunk(marker interface{}) (core.ListObjectResult, error) {
-	result, err := c.bucket.ListObjects(marker.(oss.Option))
+	var result oss.ListObjectsResult
+	var err error
+
+	if reflect.TypeOf(marker).String() == "string" {
+		result, err = c.bucket.ListObjects(oss.Prefix(marker.(string)))
+	} else {
+		result, err = c.bucket.ListObjects(marker.(oss.Option))
+	}
 
 	return &ListObjectResult{ossResult: result}, err
 }
