@@ -92,37 +92,6 @@ func (s *Store) Exists(key string) (bool, error) {
 	return true, nil
 }
 
-func (s *Store) Iterator(dir string) core.FileIterator {
-	return core.NewFileIterator(&Chunks{
-		bucket: s.config.Bucket,
-		client: s.client,
-		prefix: dir,
-	})
-}
-
-type Chunks struct {
-	prefix     string
-	nextMarker string
-	bucket     string
-	client     *obs.ObsClient
-}
-
-func (c *Chunks) Chunk() (core.ListObjectResult, error) {
-	input := &obs.ListObjectsInput{}
-	input.Bucket = c.bucket
-	input.Marker = c.nextMarker
-	input.Prefix = c.prefix
-
-	// 参考文档：https://support.huaweicloud.com/sdk-android-devg-obs/obs_26_0603.html
-	// input.maxKeys 列举对象的最大数目，取值范围为1~1000，当超出范围时，按照默认的1000进行处理。
-	output, err := c.client.ListObjects(input)
-	if err != nil {
-		return nil, err
-	}
-
-	if output.IsTruncated {
-		c.nextMarker = output.NextMarker
-	}
-
-	return NewListObjectResult(output), nil
+func (s *Store) Iterator(prefix string) core.FileIterator {
+	return core.NewFileIterator(NewChunks(s.config.Bucket, prefix, s.client))
 }

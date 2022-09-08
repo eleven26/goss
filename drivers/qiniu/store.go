@@ -128,30 +128,6 @@ func (s *Store) Delete(key string) error {
 	return s.bucketManager.Delete(s.config.Bucket, key)
 }
 
-func (s *Store) Iterator(dir string) core.FileIterator {
-	return core.NewFileIterator(&Chunks{
-		bucket:        s.config.Bucket,
-		bucketManager: s.bucketManager,
-		prefix:        dir,
-	})
-}
-
-type Chunks struct {
-	prefix        string
-	bucket        string
-	bucketManager *storage.BucketManager
-	nextMarker    string
-}
-
-func (c *Chunks) Chunk() (core.ListObjectResult, error) {
-	// 参考文档：https://developer.qiniu.com/kodo/1284/list
-	// ListFiles 最后一个参数 limit 为单次列举的条目数，范围为1-1000。 默认值为1000。
-	entries, _, nextMarker, hasNext, err := c.bucketManager.ListFiles(c.bucket, c.prefix, "", c.nextMarker, 100)
-	if err != nil {
-		return nil, err
-	}
-
-	c.nextMarker = nextMarker
-
-	return NewListObjectResult(entries, hasNext), nil
+func (s *Store) Iterator(prefix string) core.FileIterator {
+	return core.NewFileIterator(NewChunks(s.config.Bucket, prefix, s.bucketManager))
 }

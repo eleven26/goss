@@ -44,31 +44,6 @@ func (s *Store) Exists(key string) (bool, error) {
 	return s.Bucket.IsObjectExist(key)
 }
 
-func (s *Store) Iterator(dir string) core.FileIterator {
-	return core.NewFileIterator(&Chunks{prefix: dir, bucket: s.Bucket})
-}
-
-type Chunks struct {
-	count      int64
-	prefix     string
-	nextMarker string
-	bucket     *oss.Bucket
-}
-
-func (c *Chunks) Chunk() (core.ListObjectResult, error) {
-	var result oss.ListObjectsResult
-	var err error
-
-	// 参考文档：https://help.aliyun.com/document_detail/31965.html
-	// 单次最多返回 100 条，可通过 oss.MaxKeys() 设置单词最大返回条目数量
-	if c.count == 0 {
-		result, err = c.bucket.ListObjects(oss.Prefix(c.prefix))
-	} else {
-		result, err = c.bucket.ListObjects(oss.Prefix(c.prefix), oss.Marker(c.nextMarker))
-	}
-
-	c.count++
-	c.nextMarker = result.NextMarker
-
-	return NewListObjectResult(result), err
+func (s *Store) Iterator(prefix string) core.FileIterator {
+	return core.NewFileIterator(NewChunks(prefix, s.Bucket))
 }

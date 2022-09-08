@@ -24,6 +24,6 @@ type Store interface {
 	// Exists determines whether the object pointed to by key exists.
 	Exists(key string) (bool, error)
 
-	// Iterator gets a FileIterator based on marker.
-	Iterator(marker string) FileIterator
+	// Iterator gets a FileIterator based on prefix.
+	Iterator(prefix string) FileIterator
 }
