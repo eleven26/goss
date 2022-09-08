@@ -20,7 +20,7 @@ func NewChunks(prefix string, bucket *oss.Bucket) core.Chunks {
 	}
 }
 
-func (c *Chunks) Chunk() (core.ListObjectResult, error) {
+func (c *Chunks) Chunk() (*core.ListObjectResult, error) {
 	var result oss.ListObjectsResult
 	var err error
 

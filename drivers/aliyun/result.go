@@ -7,15 +7,10 @@ import (
 	"github.com/eleven26/goss/core"
 )
 
-type ListObjectResult struct {
-	files      []core.File
-	isFinished bool
-}
-
-func NewListObjectResult(result oss.ListObjectsResult) core.ListObjectResult {
-	return &ListObjectResult{
-		files:      getFiles(result.Objects),
-		isFinished: !result.IsTruncated,
+func NewListObjectResult(result oss.ListObjectsResult) *core.ListObjectResult {
+	return &core.ListObjectResult{
+		Files:      getFiles(result.Objects),
+		IsFinished: !result.IsTruncated,
 	}
 }
 
@@ -31,16 +26,4 @@ func getFiles(objects []oss.ObjectProperties) []core.File {
 	}
 
 	return files
-}
-
-func (l *ListObjectResult) Files() []core.File {
-	return l.files
-}
-
-func (l *ListObjectResult) Len() int {
-	return len(l.files)
-}
-
-func (l *ListObjectResult) IsFinished() bool {
-	return l.isFinished
 }

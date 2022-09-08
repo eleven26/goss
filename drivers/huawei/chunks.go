@@ -21,7 +21,7 @@ func NewChunks(bucket string, prefix string, client *obs.ObsClient) core.Chunks 
 	}
 }
 
-func (c *Chunks) Chunk() (core.ListObjectResult, error) {
+func (c *Chunks) Chunk() (*core.ListObjectResult, error) {
 	input := &obs.ListObjectsInput{}
 	input.Bucket = c.bucket
 	input.Marker = c.nextMarker

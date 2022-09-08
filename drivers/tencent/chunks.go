@@ -22,7 +22,7 @@ func NewChunks(prefix string, bucket *cos.BucketService) core.Chunks {
 	}
 }
 
-func (c *Chunks) Chunk() (core.ListObjectResult, error) {
+func (c *Chunks) Chunk() (*core.ListObjectResult, error) {
 	var opt cos.BucketGetOptions
 	var result *cos.BucketGetResult
 	var err error

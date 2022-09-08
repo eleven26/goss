@@ -2,22 +2,13 @@ package core
 
 // FileIterator is an iterator used to iterate over all objects in the cloud.
 type FileIterator interface {
-	// HasNext Determine if there is a next object.
-	HasNext() bool
-
-	// Next Get the next object.
-	Next() (File, error)
-
 	// All Get all objects.
 	All() ([]File, error)
-
-	// GetNextChunk Get the next batch of objects.
-	GetNextChunk() error
 }
 
 // Chunks is used to get the next "page" of objects.
 type Chunks interface {
-	Chunk() (ListObjectResult, error)
+	Chunk() (*ListObjectResult, error)
 }
 
 // fileIterator is the iterator used to iterate over all matching objects.
@@ -38,24 +29,10 @@ func NewFileIterator(chunks Chunks) FileIterator {
 	}
 }
 
-// HasNext check if there is a next object.
-func (f *fileIterator) HasNext() bool {
-	// No chunk have been got.
-	if f.chunksCount == 0 {
-		err := f.GetNextChunk()
-		if err != nil {
-			return false
-		}
-	}
-
-	// No more chunks.
-	if f.isFinished {
-		return f.index < f.count
-	}
-
-	// Get next "page".
-	if f.index == f.count {
-		err := f.GetNextChunk()
+// hasNext check if there is a next object.
+func (f *fileIterator) hasNext() bool {
+	if f.shouldGetNextChunk() {
+		err := f.getNextChunk()
 		if err != nil {
 			return false
 		}
@@ -64,34 +41,40 @@ func (f *fileIterator) HasNext() bool {
 	return f.index < f.count
 }
 
-// Next get the next object.
-func (f *fileIterator) Next() (file File, err error) {
-	if !f.HasNext() {
-		return
+func (f *fileIterator) shouldGetNextChunk() bool {
+	if f.chunksCount == 0 {
+		return true
 	}
 
-	file = f.files[f.index]
+	if f.isFinished {
+		return false
+	}
+
+	return f.index == f.count
+}
+
+// next get the next object.
+func (f *fileIterator) next() File {
+	file := f.files[f.index]
 
 	f.index++
 
-	return
+	return file
 }
 
-// GetNextChunk get next "page" of objects.
-func (f *fileIterator) GetNextChunk() error {
+// getNextChunk get next "page" of objects.
+func (f *fileIterator) getNextChunk() error {
 	f.chunksCount++
-	return f.handleChunkResult(f.chunks.Chunk())
-}
 
-func (f *fileIterator) handleChunkResult(result ListObjectResult, err error) error {
+	result, err := f.chunks.Chunk()
 	if err != nil {
 		return err
 	}
 
 	f.index = 0
-	f.count = result.Len()
-	f.files = result.Files()
-	f.isFinished = result.IsFinished()
+	f.files = result.Files
+	f.count = len(f.files)
+	f.isFinished = result.IsFinished
 
 	return nil
 }
@@ -101,16 +84,11 @@ func (f *fileIterator) All() ([]File, error) {
 	var res []File
 
 	for {
-		if f.HasNext() {
-			file, err := f.Next()
-			if err != nil {
-				return res, err
-			}
-
-			res = append(res, file)
-		} else {
+		if !f.hasNext() {
 			break
 		}
+
+		res = append(res, f.next())
 	}
 
 	return res, nil
