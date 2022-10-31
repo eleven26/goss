@@ -6,6 +6,7 @@ retract v1.0.0
 
 require (
 	github.com/aliyun/aliyun-oss-go-sdk v2.2.4+incompatible
+	github.com/aws/aws-sdk-go v1.44.125
 	github.com/eleven26/go-filesystem v1.0.0
 	github.com/huaweicloud/huaweicloud-sdk-go-obs v3.21.12+incompatible
 	github.com/qiniu/go-sdk/v7 v7.13.0
@@ -21,6 +22,7 @@ require (
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/magiconair/properties v1.8.6 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/mozillazg/go-httpheader v0.3.1 // indirect

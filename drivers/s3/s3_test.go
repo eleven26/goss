@@ -1,15 +1,20 @@
-//go:build integration_qiniu
+//go:build integration
 
-package qiniu
+package s3
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 	"testing"
 	"time"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/s3"
 	config2 "github.com/eleven26/goss/config"
 	"github.com/eleven26/goss/core"
 	"github.com/eleven26/goss/utils"
@@ -61,7 +66,11 @@ func tearDown(t *testing.T) {
 }
 
 func deleteRemote(t *testing.T) {
-	err := store.bucketManager.Delete(store.config.Bucket, key)
+	input := &s3.DeleteObjectInput{
+		Bucket: aws.String(store.Bucket),
+		Key:    aws.String(key),
+	}
+	_, err := store.s3.DeleteObject(input)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -94,7 +103,7 @@ func TestPut(t *testing.T) {
 	err = storage2.Put(key, f)
 	assert.Nil(t, err)
 
-	_, err = store.bucketManager.Stat(store.config.Bucket, key)
+	_, err = store.getObject(key)
 	assert.Nil(t, err)
 }
 
@@ -104,7 +113,7 @@ func TestPutFromFile(t *testing.T) {
 	err := storage2.PutFromFile(key, fooPath)
 	assert.Nil(t, err)
 
-	_, err = store.bucketManager.Stat(store.config.Bucket, key)
+	_, err = store.getObject(key)
 	assert.Nil(t, err)
 }
 
@@ -147,7 +156,7 @@ func TestDelete(t *testing.T) {
 	err := storage2.Delete(key)
 	assert.Nil(t, err)
 
-	_, err = store.bucketManager.Stat(store.config.Bucket, key)
+	_, err = store.getObject(key)
 	assert.NotNil(t, err)
 }
 
@@ -171,8 +180,19 @@ func TestExists(t *testing.T) {
 
 	exists, err = storage2.Exists(key + "not_exists")
 
-	assert.NotNil(t, err)
+	assert.Nil(t, err)
 	assert.False(t, exists)
+}
+
+func TestSize(t *testing.T) {
+	setUp(t)
+	defer tearDown(t)
+
+	size, err := storage2.Size(key)
+
+	var siz int64 = 3
+	assert.Nil(t, err)
+	assert.Equal(t, siz, size)
 }
 
 func TestFiles(t *testing.T) {
@@ -191,15 +211,13 @@ func TestFiles(t *testing.T) {
 	assert.Equal(t, today, files[0].LastModified().Format("2006-01-02"))
 }
 
-func TestSize(t *testing.T) {
-	setUp(t)
-	defer tearDown(t)
+func sTestAb(t *testing.T) {
+	dir := "test_all/"
 
-	size, err := storage2.Size(key)
-
-	var siz int64 = 3
-	assert.Nil(t, err)
-	assert.Equal(t, siz, size)
+	for i := 1; i <= 200; i++ {
+		err := storage2.Put(fmt.Sprintf("%s%s.txt", dir, strconv.Itoa(i)), strings.NewReader("foo"))
+		assert.Nil(t, err)
+	}
 }
 
 func TestFilesWithMultiPage(t *testing.T) {

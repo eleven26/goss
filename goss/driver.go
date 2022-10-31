@@ -3,6 +3,8 @@ package goss
 import (
 	"errors"
 
+	"github.com/eleven26/goss/drivers/s3"
+
 	"github.com/eleven26/goss/core"
 	"github.com/eleven26/goss/drivers/aliyun"
 	"github.com/eleven26/goss/drivers/huawei"
@@ -17,6 +19,7 @@ const (
 	Tencent = "tencent"
 	Qiniu   = "qiniu"
 	Huawei  = "huawei"
+	S3      = "s3"
 )
 
 var (
@@ -44,6 +47,8 @@ func defaultDriver() (core.Driver, error) {
 		return qiniu.NewDriver(), nil
 	case Huawei:
 		return huawei.NewDriver(), nil
+	case S3:
+		return s3.NewDriver(), nil
 	default:
 		return nil, ErrDriverNotExists
 	}

@@ -22,9 +22,13 @@ test:
 integration:
 	go test -v ./drivers/aliyun -cover -tags=integration
 	go test -v ./drivers/huawei -cover -tags=integration
-	go test -v ./drivers/qiniu -cover -tags=integration
 	go test -v ./drivers/tencent -cover -tags=integration
+	go test -v ./drivers/s3 -cover -tags=integration
 	go test -v ./goss/* -cover -tags=integration
+
+# 域名过期了
+integration_qiniu:
+	go test -v ./drivers/qiniu -cover -tags=integration_qiniu
 
 .PHONY: all
 all:

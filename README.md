@@ -1,6 +1,6 @@
 # goss
 
-✨ `goss` 是一个简洁的云存储 golang 库，支持**阿里云**、**腾讯云**、**七牛云**、**华为云**。
+✨ `goss` 是一个简洁的云存储 golang 库，支持**阿里云**、**腾讯云**、**七牛云**、**华为云**、**aws s3**。
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/eleven26/go-filesystem.svg)](https://pkg.go.dev/github.com/eleven26/goss)
 [![Go Report Card](https://goreportcard.com/badge/github.com/eleven26/go-filesystem)](https://goreportcard.com/report/github.com/eleven26/goss)
@@ -24,7 +24,7 @@ go get -u github.com/eleven26/goss
 
 ```yaml
 # 云存储类型
-# 可选值为： aliyun、tencent，不区分大小写
+# 可选值为： aliyun、tencent、qiniu、huawei、s3
 driver: aliyun
 
 # 阿里云 oss 配置
@@ -58,6 +58,14 @@ qiniu:
 huawei:
   endpoint:
   location:
+  bucket:
+  access_key:
+  secret_key:
+
+# aws s3 配置
+s3:
+  endpoint:
+  region:
   bucket:
   access_key:
   secret_key:
@@ -215,3 +223,4 @@ size, err := storage.Size("test/test.txt")
 2. [腾讯云对象存储](https://cloud.tencent.com/document/product/436)
 3. [七牛云对象存储](https://developer.qiniu.com/kodo)
 4. [华为云对象存储](https://support.huaweicloud.com/obs/index.html)
+4. [aws s3](https://docs.aws.amazon.com/sdk-for-go/api/service/s3/)
