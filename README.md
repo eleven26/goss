@@ -147,7 +147,7 @@ err := storage.PutFromFile("test/test.txt", "/path/to/test.txt")
 
 ### Get
 
-从云存储获取文件，返回字符串。参数是 key。返回值是 `io.ReadCloser` 和 `error`。
+从云存储获取文件。参数是 key。返回值是 `io.ReadCloser` 和 `error`。
 
 ```go
 // rc 是 `io.ReadCloser`
@@ -160,7 +160,7 @@ fmt.Println(string(bs))
 
 ### GetString
 
-从云存储获取文件，返回字符串。参数是 key。返回值是 `string` 和 `error`
+从云存储获取文件。参数是 key。返回值是 `string` 和 `error`
 
 ```go
 content, err := storage.GetString("test/test.txt")
@@ -169,7 +169,7 @@ fmt.Println(content)
 
 ### GetBytes
 
-从云存储获取文件，返回字符串。参数是 key。返回值是 `[]byte` 和 `error`
+从云存储获取文件。参数是 key。返回值是 `[]byte` 和 `error`
 
 ```go
 bs, err := storage.GetBytes("test/test.txt")
