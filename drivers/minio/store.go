@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"io"
+	"net/http"
 	"os"
 
 	"github.com/minio/minio-go/v7"
@@ -78,6 +79,12 @@ func (s *Store) Size(key string) (int64, error) {
 func (s *Store) Exists(key string) (bool, error) {
 	_, err := s.stat(key)
 	if err != nil {
+		if errResponse, ok := err.(minio.ErrorResponse); ok {
+			if errResponse.StatusCode == http.StatusNotFound {
+				return false, nil
+			}
+		}
+
 		return false, err
 	}
 

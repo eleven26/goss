@@ -180,7 +180,7 @@ func TestExists(t *testing.T) {
 
 	exists, err = storage2.Exists(key + "not_exists")
 
-	assert.NotNil(t, err)
+	assert.Nil(t, err)
 	assert.False(t, exists)
 }
 

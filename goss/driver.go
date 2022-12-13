@@ -2,6 +2,7 @@ package goss
 
 import (
 	"errors"
+
 	"github.com/eleven26/goss/drivers/minio"
 
 	"github.com/eleven26/goss/drivers/s3"
