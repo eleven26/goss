@@ -24,6 +24,7 @@ integration:
 	go test -v ./drivers/huawei -cover -tags=integration
 	go test -v ./drivers/tencent -cover -tags=integration
 	go test -v ./drivers/s3 -cover -tags=integration
+	go test -v ./drivers/minio -cover -tags=integration
 	go test -v ./goss/* -cover -tags=integration
 
 # 域名过期了

@@ -34,3 +34,11 @@ s3:
   bucket:
   access_key:
   secret_key:
+
+# minio 配置
+minio:
+  endpoint:
+  bucket:
+  access_key:
+  secret_key:
+  use_ssl: false

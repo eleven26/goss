@@ -1,6 +1,6 @@
 # goss
 
-✨ `goss` 是一个简洁的云存储 golang 库，支持**阿里云**、**腾讯云**、**七牛云**、**华为云**、**aws s3**。
+✨ `goss` 是一个简洁的云存储 golang 库，支持**阿里云**、**腾讯云**、**七牛云**、**华为云**、**aws s3**、**minio**。
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/eleven26/go-filesystem.svg)](https://pkg.go.dev/github.com/eleven26/goss)
 [![Go Report Card](https://goreportcard.com/badge/github.com/eleven26/go-filesystem)](https://goreportcard.com/report/github.com/eleven26/goss)
@@ -24,7 +24,7 @@ go get -u github.com/eleven26/goss
 
 ```yaml
 # 云存储类型
-# 可选值为： aliyun、tencent、qiniu、huawei、s3
+# 可选值为： aliyun、tencent、qiniu、huawei、s3、minio
 driver: aliyun
 
 # 阿里云 oss 配置
@@ -69,6 +69,14 @@ s3:
   bucket:
   access_key:
   secret_key:
+
+# minio 配置
+minio:
+  endpoint:
+  bucket:
+  access_key:
+  secret_key:
+  use_ssl: false
 ```
 
 样例配置：
@@ -205,6 +213,8 @@ exists, err := storage.Exists("test/test.txt")
 
 根据前缀获取文件列表。
 
+> minio 最多返回 1000 个，其他的有多少返回多少。
+
 ```go
 exists, err := storage.Files("test/")
 ```
@@ -223,4 +233,5 @@ size, err := storage.Size("test/test.txt")
 2. [腾讯云对象存储](https://cloud.tencent.com/document/product/436)
 3. [七牛云对象存储](https://developer.qiniu.com/kodo)
 4. [华为云对象存储](https://support.huaweicloud.com/obs/index.html)
-4. [aws s3](https://docs.aws.amazon.com/sdk-for-go/api/service/s3/)
+5. [aws s3](https://docs.aws.amazon.com/sdk-for-go/api/service/s3/)
+6. [minio](https://github.com/minio/minio)
