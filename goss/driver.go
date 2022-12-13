@@ -2,6 +2,7 @@ package goss
 
 import (
 	"errors"
+	"github.com/eleven26/goss/drivers/minio"
 
 	"github.com/eleven26/goss/drivers/s3"
 
@@ -20,6 +21,7 @@ const (
 	Qiniu   = "qiniu"
 	Huawei  = "huawei"
 	S3      = "s3"
+	Minio   = "minio"
 )
 
 var (
@@ -49,6 +51,8 @@ func defaultDriver() (core.Driver, error) {
 		return huawei.NewDriver(), nil
 	case S3:
 		return s3.NewDriver(), nil
+	case Minio:
+		return minio.NewDriver(), nil
 	default:
 		return nil, ErrDriverNotExists
 	}

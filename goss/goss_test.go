@@ -40,6 +40,16 @@ func TestNew(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, "core.storage", reflect.TypeOf(goss.Storage).Elem().String())
 
+	viper.Set("driver", S3)
+	goss, err = New(configPath)
+	assert.Nil(t, err)
+	assert.Equal(t, "core.storage", reflect.TypeOf(goss.Storage).Elem().String())
+
+	viper.Set("driver", Minio)
+	goss, err = New(configPath)
+	assert.Nil(t, err)
+	assert.Equal(t, "core.storage", reflect.TypeOf(goss.Storage).Elem().String())
+
 	viper.Set("driver", "not_exists")
 	goss, err = New(configPath)
 	assert.NotNil(t, err)
