@@ -3,18 +3,27 @@ package huawei
 import (
 	"github.com/eleven26/goss/core"
 	"github.com/huaweicloud/huaweicloud-sdk-go-obs/obs"
+	"github.com/spf13/viper"
 )
 
-type Driver struct{}
+type Driver struct {
+	Viper *viper.Viper
+}
 
-func NewDriver() core.Driver {
-	return &Driver{}
+func NewDriver(opts ...core.Option) core.Driver {
+	driver := &Driver{}
+
+	for _, option := range opts {
+		option(driver)
+	}
+
+	return driver
 }
 
 func (d *Driver) Storage() (core.Storage, error) {
-	conf := getConfig()
+	conf := getConfig(d.Viper)
 
-	client, err := getClient()
+	client, err := d.getClient()
 	if err != nil {
 		return nil, err
 	}
@@ -27,8 +36,8 @@ func (d *Driver) Storage() (core.Storage, error) {
 	return core.NewStorage(&store), nil
 }
 
-func getClient() (*obs.ObsClient, error) {
-	conf := getConfig()
+func (d *Driver) getClient() (*obs.ObsClient, error) {
+	conf := getConfig(d.Viper)
 
 	if conf.Endpoint == "" || conf.Location == "" || conf.Bucket == "" || conf.AccessKey == "" || conf.SecretKey == "" {
 		return nil, core.ErrorConfigEmpty

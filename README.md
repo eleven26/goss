@@ -1,6 +1,6 @@
 # goss
 
-✨ `goss` 是一个简洁的云存储 golang 库，支持**阿里云**、**腾讯云**、**七牛云**、**华为云**、**aws s3**、**minio**。
+✨ `goss` 是一个简洁的云存储 golang 库，支持**阿里云**、**腾讯云**、**华为云**、**aws s3**、**minio**。
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/eleven26/go-filesystem.svg)](https://pkg.go.dev/github.com/eleven26/goss)
 [![Go Report Card](https://goreportcard.com/badge/github.com/eleven26/go-filesystem)](https://goreportcard.com/report/github.com/eleven26/goss)
@@ -24,7 +24,7 @@ go get -u github.com/eleven26/goss
 
 ```yaml
 # 云存储类型
-# 可选值为： aliyun、tencent、qiniu、huawei、s3、minio
+# 可选值为： aliyun、tencent、huawei、s3、minio
 driver: aliyun
 
 # 阿里云 oss 配置
@@ -42,17 +42,6 @@ tencent:
   url:
   secret_id:
   secret_key:
-
-# 七牛云 kodo 配置
-qiniu:
-  # bucket 名称
-  bucket:
-  access_key:
-  secret_key:
-  # bucket 外链域名
-  domain:
-  # 是否是私有空间
-  private:
 
 # 华为云 obs 配置
 huawei:
@@ -108,6 +97,14 @@ import "github.com/eleven26/goss/goss"
 // path 是配置文件的路径
 path := "./goss.yml"
 goss, err := goss.New(path)
+// storage 是云存储对象
+storage := goss.Storage
+```
+
+另外一种初始化的方式，传入 `viper` 对象：
+
+```go
+goss, err := goss.NewWithViper(viper)
 // storage 是云存储对象
 storage := goss.Storage
 ```
@@ -231,7 +228,6 @@ size, err := storage.Size("test/test.txt")
 
 1. [阿里云对象存储](https://help.aliyun.com/product/31815.html)
 2. [腾讯云对象存储](https://cloud.tencent.com/document/product/436)
-3. [七牛云对象存储](https://developer.qiniu.com/kodo)
-4. [华为云对象存储](https://support.huaweicloud.com/obs/index.html)
-5. [aws s3](https://docs.aws.amazon.com/sdk-for-go/api/service/s3/)
-6. [minio](https://github.com/minio/minio)
+3. [华为云对象存储](https://support.huaweicloud.com/obs/index.html)
+4. [aws s3](https://docs.aws.amazon.com/sdk-for-go/api/service/s3/)
+5. [minio](https://github.com/minio/minio)

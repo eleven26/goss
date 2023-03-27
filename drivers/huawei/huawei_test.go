@@ -8,7 +8,10 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
+
+	"github.com/spf13/viper"
 
 	fs "github.com/eleven26/go-filesystem"
 	config2 "github.com/eleven26/goss/config"
@@ -40,16 +43,18 @@ func init() {
 		log.Fatal(err)
 	}
 
-	d := NewDriver()
+	vip := viper.GetViper()
+
+	d := NewDriver(core.WithViper(vip))
 	storage, err = d.Storage()
 	if err != nil {
 		log.Fatal(err)
 	}
 	store = storage.Store().(*Store)
 
-	conf = *getConfig()
+	conf = *getConfig(vip)
 
-	client, err = getClient()
+	client, err = reflect.ValueOf(d).Interface().(*Driver).getClient()
 	if err != nil {
 		log.Fatal(err)
 	}

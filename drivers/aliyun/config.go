@@ -9,7 +9,7 @@ type config struct {
 	AccessKeySecret string
 }
 
-func getConfig() *config {
+func getConfig(viper *viper.Viper) *config {
 	return &config{
 		Endpoint:        viper.GetString("aliyun.endpoint"),
 		Bucket:          viper.GetString("aliyun.bucket"),

@@ -8,7 +8,7 @@ type config struct {
 	SecretKey string
 }
 
-func getConfig() *config {
+func getConfig(viper *viper.Viper) *config {
 	return &config{
 		Url:       viper.GetString("tencent.url"),
 		SecretId:  viper.GetString("tencent.secret_id"),

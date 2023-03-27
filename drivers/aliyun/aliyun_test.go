@@ -8,7 +8,10 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
+
+	"github.com/spf13/viper"
 
 	config2 "github.com/eleven26/goss/config"
 	"github.com/eleven26/goss/core"
@@ -36,12 +39,12 @@ func init() {
 		log.Fatal(err)
 	}
 
-	d := NewDriver()
+	d := NewDriver(core.WithViper(viper.GetViper()))
 	storage, err = d.Storage()
 	if err != nil {
 		log.Fatal(err)
 	}
-	bucket, err = ossBucket()
+	bucket, err = reflect.ValueOf(d).Interface().(*Driver).ossBucket()
 	if err != nil {
 		log.Fatal(err)
 	}
