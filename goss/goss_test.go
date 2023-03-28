@@ -30,6 +30,11 @@ func TestNew(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, "core.storage", reflect.TypeOf(goss.Storage).Elem().String())
 
+	viper.Set("driver", Qiniu)
+	goss, err = New(configPath)
+	assert.Nil(t, err)
+	assert.Equal(t, "core.storage", reflect.TypeOf(goss.Storage).Elem().String())
+
 	viper.Set("driver", Huawei)
 	goss, err = New(configPath)
 	assert.Nil(t, err)
@@ -70,6 +75,11 @@ func TestNewWithViper(t *testing.T) {
 	assert.Equal(t, "core.storage", reflect.TypeOf(goss.Storage).Elem().String())
 
 	v.Set("driver", Tencent)
+	goss, err = NewWithViper(v)
+	assert.Nil(t, err)
+	assert.Equal(t, "core.storage", reflect.TypeOf(goss.Storage).Elem().String())
+
+	v.Set("driver", Qiniu)
 	goss, err = NewWithViper(v)
 	assert.Nil(t, err)
 	assert.Equal(t, "core.storage", reflect.TypeOf(goss.Storage).Elem().String())

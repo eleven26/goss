@@ -1,9 +1,8 @@
-//go:build integration
+//go:build integration_qiniu
 
-package minio
+package qiniu
 
 import (
-	"context"
 	"fmt"
 	"io"
 	"log"
@@ -15,8 +14,6 @@ import (
 	"time"
 
 	"github.com/spf13/viper"
-
-	"github.com/minio/minio-go/v7"
 
 	config2 "github.com/eleven26/goss/config"
 	"github.com/eleven26/goss/core"
@@ -43,9 +40,9 @@ func init() {
 		log.Fatal(err)
 	}
 
-	vip := viper.GetViper()
+	v := viper.GetViper()
 
-	d := NewDriver(core.WithViper(vip))
+	d := NewDriver(core.WithViper(v))
 	storage2, err = d.Storage()
 	if err != nil {
 		log.Fatal(err)
@@ -71,7 +68,7 @@ func tearDown(t *testing.T) {
 }
 
 func deleteRemote(t *testing.T) {
-	err := store.client.RemoveObject(context.Background(), store.Bucket, key, minio.RemoveObjectOptions{})
+	err := store.bucketManager.Delete(store.config.Bucket, key)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -104,12 +101,8 @@ func TestPut(t *testing.T) {
 	err = storage2.Put(key, f)
 	assert.Nil(t, err)
 
-	obj, err := store.getObject(key)
+	_, err = store.bucketManager.Stat(store.config.Bucket, key)
 	assert.Nil(t, err)
-
-	bs, err := io.ReadAll(obj)
-	assert.Nil(t, err)
-	assert.Equal(t, "foo", string(bs))
 }
 
 func TestPutFromFile(t *testing.T) {
@@ -118,7 +111,7 @@ func TestPutFromFile(t *testing.T) {
 	err := storage2.PutFromFile(key, fooPath)
 	assert.Nil(t, err)
 
-	_, err = store.getObject(key)
+	_, err = store.bucketManager.Stat(store.config.Bucket, key)
 	assert.Nil(t, err)
 }
 
@@ -161,10 +154,7 @@ func TestDelete(t *testing.T) {
 	err := storage2.Delete(key)
 	assert.Nil(t, err)
 
-	obj, err := store.getObject(key)
-	assert.Nil(t, err)
-
-	_, err = obj.Stat()
+	_, err = store.bucketManager.Stat(store.config.Bucket, key)
 	assert.NotNil(t, err)
 }
 
@@ -188,19 +178,8 @@ func TestExists(t *testing.T) {
 
 	exists, err = storage2.Exists(key + "not_exists")
 
-	assert.Nil(t, err)
+	assert.NotNil(t, err)
 	assert.False(t, exists)
-}
-
-func TestSize(t *testing.T) {
-	setUp(t)
-	defer tearDown(t)
-
-	size, err := storage2.Size(key)
-
-	var siz int64 = 3
-	assert.Nil(t, err)
-	assert.Equal(t, siz, size)
 }
 
 func TestFiles(t *testing.T) {
@@ -217,6 +196,17 @@ func TestFiles(t *testing.T) {
 
 	today := time.Now().Format("2006-01-02")
 	assert.Equal(t, today, files[0].LastModified().Format("2006-01-02"))
+}
+
+func TestSize(t *testing.T) {
+	setUp(t)
+	defer tearDown(t)
+
+	size, err := storage2.Size(key)
+
+	var siz int64 = 3
+	assert.Nil(t, err)
+	assert.Equal(t, siz, size)
 }
 
 func aTestAb(t *testing.T) {

@@ -9,6 +9,7 @@ import (
 	"github.com/eleven26/goss/drivers/aliyun"
 	"github.com/eleven26/goss/drivers/huawei"
 	"github.com/eleven26/goss/drivers/minio"
+	"github.com/eleven26/goss/drivers/qiniu"
 	"github.com/eleven26/goss/drivers/s3"
 	"github.com/eleven26/goss/drivers/tencent"
 )
@@ -16,6 +17,7 @@ import (
 const (
 	Aliyun  = "aliyun"
 	Tencent = "tencent"
+	Qiniu   = "qiniu"
 	Huawei  = "huawei"
 	S3      = "s3"
 	Minio   = "minio"
@@ -42,6 +44,8 @@ func defaultDriver(opts ...core.Option) (core.Driver, error) {
 		return aliyun.NewDriver(opts...), nil
 	case Tencent:
 		return tencent.NewDriver(opts...), nil
+	case Qiniu:
+		return qiniu.NewDriver(opts...), nil
 	case Huawei:
 		return huawei.NewDriver(opts...), nil
 	case S3:
