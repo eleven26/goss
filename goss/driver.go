@@ -3,17 +3,15 @@ package goss
 import (
 	"errors"
 
-	"github.com/eleven26/goss/drivers/minio"
-
-	"github.com/eleven26/goss/drivers/s3"
+	"github.com/spf13/viper"
 
 	"github.com/eleven26/goss/core"
 	"github.com/eleven26/goss/drivers/aliyun"
 	"github.com/eleven26/goss/drivers/huawei"
+	"github.com/eleven26/goss/drivers/minio"
 	"github.com/eleven26/goss/drivers/qiniu"
+	"github.com/eleven26/goss/drivers/s3"
 	"github.com/eleven26/goss/drivers/tencent"
-
-	"github.com/spf13/viper"
 )
 
 const (
@@ -34,7 +32,7 @@ var (
 )
 
 // defaultDriver get the driver specified by "driver" in the configuration file.
-func defaultDriver() (core.Driver, error) {
+func defaultDriver(opts ...core.Option) (core.Driver, error) {
 	if !viper.IsSet("driver") {
 		return nil, ErrNoDefaultDriver
 	}
@@ -43,17 +41,17 @@ func defaultDriver() (core.Driver, error) {
 
 	switch driver {
 	case Aliyun:
-		return aliyun.NewDriver(), nil
+		return aliyun.NewDriver(opts...), nil
 	case Tencent:
-		return tencent.NewDriver(), nil
+		return tencent.NewDriver(opts...), nil
 	case Qiniu:
-		return qiniu.NewDriver(), nil
+		return qiniu.NewDriver(opts...), nil
 	case Huawei:
-		return huawei.NewDriver(), nil
+		return huawei.NewDriver(opts...), nil
 	case S3:
-		return s3.NewDriver(), nil
+		return s3.NewDriver(opts...), nil
 	case Minio:
-		return minio.NewDriver(), nil
+		return minio.NewDriver(opts...), nil
 	default:
 		return nil, ErrDriverNotExists
 	}

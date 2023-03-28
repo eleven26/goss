@@ -10,7 +10,7 @@ require (
 	github.com/eleven26/go-filesystem v1.0.0
 	github.com/huaweicloud/huaweicloud-sdk-go-obs v3.21.12+incompatible
 	github.com/minio/minio-go/v7 v7.0.45
-	github.com/qiniu/go-sdk/v7 v7.13.0
+	github.com/qiniu/go-sdk/v7 v7.14.0
 	github.com/spf13/viper v1.12.0
 	github.com/stretchr/testify v1.8.0
 	github.com/tencentyun/cos-go-sdk-v5 v0.7.36

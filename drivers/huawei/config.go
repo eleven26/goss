@@ -10,7 +10,7 @@ type config struct {
 	SecretKey string
 }
 
-func getConfig() *config {
+func getConfig(viper *viper.Viper) *config {
 	return &config{
 		Endpoint:  viper.GetString("huawei.endpoint"),
 		Location:  viper.GetString("huawei.location"),

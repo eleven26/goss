@@ -29,7 +29,7 @@ func (s *Store) Put(key string, r io.Reader) error {
 		return err
 	}
 
-	err = formUploader.Put(context.Background(), &ret, upToken, key, buf, size, nil)
+	err = formUploader.Put(context.Background(), &ret, upToken, key, buf, size, &storage.PutExtra{})
 	if err != nil {
 		return err
 	}

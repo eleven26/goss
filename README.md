@@ -112,6 +112,14 @@ goss, err := goss.New(path)
 storage := goss.Storage
 ```
 
+另外一种初始化的方式，传入 `viper` 对象：
+
+```go
+goss, err := goss.NewWithViper(viper)
+// storage 是云存储对象
+storage := goss.Storage
+```
+
 3. 使用
 
 ```go

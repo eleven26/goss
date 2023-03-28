@@ -11,6 +11,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/spf13/viper"
+
 	config2 "github.com/eleven26/goss/config"
 	"github.com/eleven26/goss/core"
 	"github.com/eleven26/goss/utils"
@@ -37,7 +39,9 @@ func init() {
 		log.Fatal(err)
 	}
 
-	d := NewDriver()
+	vip := viper.GetViper()
+
+	d := NewDriver(core.WithViper(vip))
 	storage, err = d.Storage()
 	if err != nil {
 		log.Fatal(err)

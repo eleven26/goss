@@ -10,7 +10,7 @@ type config struct {
 	Bucket    string
 }
 
-func getConfig() *config {
+func getConfig(viper *viper.Viper) *config {
 	return &config{
 		Endpoint:  viper.GetString("minio.endpoint"),
 		AccessKey: viper.GetString("minio.access_key"),

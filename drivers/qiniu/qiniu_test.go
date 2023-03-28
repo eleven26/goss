@@ -3,12 +3,17 @@
 package qiniu
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 	"testing"
 	"time"
+
+	"github.com/spf13/viper"
 
 	config2 "github.com/eleven26/goss/config"
 	"github.com/eleven26/goss/core"
@@ -35,7 +40,9 @@ func init() {
 		log.Fatal(err)
 	}
 
-	d := NewDriver()
+	v := viper.GetViper()
+
+	d := NewDriver(core.WithViper(v))
 	storage2, err = d.Storage()
 	if err != nil {
 		log.Fatal(err)
@@ -200,6 +207,15 @@ func TestSize(t *testing.T) {
 	var siz int64 = 3
 	assert.Nil(t, err)
 	assert.Equal(t, siz, size)
+}
+
+func aTestAb(t *testing.T) {
+	dir := "test_all/"
+
+	for i := 1; i <= 200; i++ {
+		err := storage2.Put(fmt.Sprintf("%s%s.txt", dir, strconv.Itoa(i)), strings.NewReader("foo"))
+		assert.Nil(t, err)
+	}
 }
 
 func TestFilesWithMultiPage(t *testing.T) {

@@ -11,7 +11,7 @@ type config struct {
 	Private   bool
 }
 
-func getConfig() *config {
+func getConfig(viper *viper.Viper) *config {
 	return &config{
 		Bucket:    viper.GetString("qiniu.bucket"),
 		AccessKey: viper.GetString("qiniu.access_key"),

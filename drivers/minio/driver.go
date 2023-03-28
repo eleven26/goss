@@ -4,16 +4,25 @@ import (
 	"github.com/eleven26/goss/core"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
+	"github.com/spf13/viper"
 )
 
-type Driver struct{}
+type Driver struct {
+	Viper *viper.Viper
+}
 
-func NewDriver() core.Driver {
-	return &Driver{}
+func NewDriver(opts ...core.Option) core.Driver {
+	driver := &Driver{}
+
+	for _, option := range opts {
+		option(driver)
+	}
+
+	return driver
 }
 
 func (d *Driver) Storage() (core.Storage, error) {
-	conf := getConfig()
+	conf := getConfig(d.Viper)
 
 	if conf.Bucket == "" || conf.AccessKey == "" || conf.SecretKey == "" || conf.Endpoint == "" {
 		return nil, core.ErrorConfigEmpty

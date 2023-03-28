@@ -3,16 +3,25 @@ package aliyun
 import (
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/eleven26/goss/core"
+	"github.com/spf13/viper"
 )
 
-type Driver struct{}
+type Driver struct {
+	Viper *viper.Viper
+}
 
-func NewDriver() core.Driver {
-	return &Driver{}
+func NewDriver(opts ...core.Option) core.Driver {
+	driver := &Driver{}
+
+	for _, option := range opts {
+		option(driver)
+	}
+
+	return driver
 }
 
 func (d *Driver) Storage() (core.Storage, error) {
-	bucket, err := ossBucket()
+	bucket, err := d.ossBucket()
 	if err != nil {
 		return nil, err
 	}
@@ -24,8 +33,8 @@ func (d *Driver) Storage() (core.Storage, error) {
 	return core.NewStorage(&store), nil
 }
 
-func ossBucket() (*oss.Bucket, error) {
-	conf := getConfig()
+func (d *Driver) ossBucket() (*oss.Bucket, error) {
+	conf := getConfig(d.Viper)
 
 	if conf.Endpoint == "" || conf.AccessKeyID == "" || conf.AccessKeySecret == "" {
 		return nil, core.ErrorConfigEmpty
