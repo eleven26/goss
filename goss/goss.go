@@ -16,7 +16,7 @@ type Goss struct {
 
 // New creates a new instance based on the configuration file pointed to by configPath.
 func New(configPath string) (*Goss, error) {
-	err := config.ReadInConfig(configPath)
+	v, err := config.ReadInConfig(configPath)
 	if err != nil {
 		return nil, err
 	}
@@ -25,7 +25,7 @@ func New(configPath string) (*Goss, error) {
 		core.New(),
 	}
 
-	driver, err := defaultDriver(core.WithViper(viper.GetViper()))
+	driver, err := defaultDriver(viper.GetString("driver"), core.WithViper(v))
 	if err != nil {
 		return nil, err
 	}
@@ -44,12 +44,12 @@ func New(configPath string) (*Goss, error) {
 }
 
 // NewWithViper creates a new instance based on the configuration file pointed to by viper.
-func NewWithViper(viper *viper.Viper) (*Goss, error) {
+func NewWithViper(v *viper.Viper) (*Goss, error) {
 	goss := Goss{
 		core.New(),
 	}
 
-	driver, err := defaultDriver(core.WithViper(viper))
+	driver, err := defaultDriver(v.GetString("driver"), core.WithViper(v))
 	if err != nil {
 		return nil, err
 	}

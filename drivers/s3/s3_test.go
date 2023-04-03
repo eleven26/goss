@@ -13,8 +13,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/spf13/viper"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	config2 "github.com/eleven26/goss/config"
@@ -37,12 +35,10 @@ var (
 )
 
 func init() {
-	err := config2.ReadInUserHomeConfig()
+	vip, err := config2.ReadInUserHomeConfig()
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	vip := viper.GetViper()
 
 	d := NewDriver(core.WithViper(vip))
 	storage2, err = d.Storage()

@@ -11,8 +11,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/spf13/viper"
-
 	fs "github.com/eleven26/go-filesystem"
 	config2 "github.com/eleven26/goss/config"
 	"github.com/eleven26/goss/core"
@@ -38,12 +36,10 @@ var (
 func init() {
 	var err error
 
-	err = config2.ReadInUserHomeConfig()
+	vip, err = config2.ReadInUserHomeConfig()
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	vip := viper.GetViper()
 
 	d := NewDriver(core.WithViper(vip))
 	storage, err = d.Storage()
