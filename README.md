@@ -14,7 +14,7 @@
 ## 🚀 安装
 
 ```
-go get -u github.com/eleven26/goss
+go get -u github.com/eleven26/goss/v2
 ```
 
 
@@ -99,7 +99,7 @@ aliyun:
 1. 你可以通过下面的代码来导入 `goss`:
 
 ```go
-import "github.com/eleven26/goss/v2/goss/v2"
+import "github.com/eleven26/goss/v2/goss"
 ```
 
 2. 使用之前需要创建实例：
