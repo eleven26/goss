@@ -29,6 +29,19 @@ func (s *Store) Put(key string, r io.Reader) error {
 	return err
 }
 
+func (s *Store) CreateBucketIfNotExists() error {
+	exists, err := s.client.BucketExists(context.Background(), s.config.Bucket)
+	if err != nil {
+		return err
+	}
+
+	if !exists {
+		return s.client.MakeBucket(context.Background(), s.config.Bucket, minio.MakeBucketOptions{})
+	}
+
+	return nil
+}
+
 func (s *Store) putFile(key string, f *os.File) error {
 	fi, err := f.Stat()
 	if err != nil {

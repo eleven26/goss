@@ -53,6 +53,11 @@ func init() {
 	testdata = filepath.Join(utils.RootDir(), "testdata")
 	fooPath = filepath.Join(testdata, "foo.txt")
 	localFooPath = filepath.Join(testdata, "foo1.txt")
+
+	err = store.CreateBucketIfNotExists()
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func setUp(t *testing.T) {
@@ -216,7 +221,7 @@ func TestFiles(t *testing.T) {
 	assert.Equal(t, today, files[0].LastModified().Format("2006-01-02"))
 }
 
-func aTestAb(t *testing.T) {
+func putFiles(t *testing.T) {
 	dir := "test_all/"
 
 	for i := 1; i <= 200; i++ {
@@ -226,6 +231,8 @@ func aTestAb(t *testing.T) {
 }
 
 func TestFilesWithMultiPage(t *testing.T) {
+	putFiles(t)
+
 	// Testdata was prepared before.
 	dir := "test_all/"
 

@@ -8,7 +8,7 @@ on:
 
 jobs:
 
-  build:
+  unit-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -25,3 +25,34 @@ jobs:
         uses: codecov/codecov-action@v3
         with:
           files: ./coverage.xml
+
+  integration-test:
+    runs-on: ubuntu-latest
+    needs: unit-test
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.18
+
+      - name: Start UP MinIO
+        uses: infleet/minio-action@v0.0.1
+        with:
+          port: "9000"
+          version: "latest"
+          username: ${{ secrets.MINIO_SERVER_ACCESS_KEY }}
+          password: ${{ secrets.MINIO_SERVER_SECRET_KEY }}
+
+      - name: Create .goss.yml
+        env:
+          GOSS_YML: ${{ secrets.GOSS_YML }}
+        run: |
+          cat <<EOF > ~/.goss.yml
+          $GOSS_YML
+          EOF
+
+      - name: Integration Test
+        run: |
+          make integration
