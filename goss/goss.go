@@ -25,7 +25,7 @@ func New(configPath string) (*Goss, error) {
 		core.New(),
 	}
 
-	driver, err := defaultDriver(viper.GetString("driver"), core.WithViper(v))
+	driver, err := defaultDriver(v.GetString("driver"), core.WithViper(v))
 	if err != nil {
 		return nil, err
 	}
