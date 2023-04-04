@@ -36,7 +36,7 @@ var (
 func init() {
 	var err error
 
-	vip, err = config2.ReadInUserHomeConfig()
+	vip, err := config2.ReadInUserHomeConfig()
 	if err != nil {
 		log.Fatal(err)
 	}
