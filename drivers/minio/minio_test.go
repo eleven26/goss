@@ -14,15 +14,13 @@ import (
 	"testing"
 	"time"
 
-	config2 "github.com/eleven26/goss/internal/config"
-
 	"github.com/minio/minio-go/v7"
-
-	"github.com/eleven26/goss/core"
-	"github.com/eleven26/goss/utils"
+	"github.com/stretchr/testify/assert"
 
 	fs "github.com/eleven26/go-filesystem"
-	"github.com/stretchr/testify/assert"
+	"github.com/eleven26/goss/v2/core"
+	config2 "github.com/eleven26/goss/v2/internal/config"
+	"github.com/eleven26/goss/v2/utils"
 )
 
 var (

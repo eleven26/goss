@@ -5,7 +5,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/eleven26/goss/core"
+	"github.com/eleven26/goss/v2/core"
 	"github.com/spf13/viper"
 )
 

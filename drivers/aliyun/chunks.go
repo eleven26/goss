@@ -2,7 +2,7 @@ package aliyun
 
 import (
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
-	"github.com/eleven26/goss/core"
+	"github.com/eleven26/goss/v2/core"
 )
 
 type Chunks struct {

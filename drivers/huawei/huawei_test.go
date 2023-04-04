@@ -11,11 +11,11 @@ import (
 	"reflect"
 	"testing"
 
-	config2 "github.com/eleven26/goss/internal/config"
+	config2 "github.com/eleven26/goss/v2/internal/config"
 
 	fs "github.com/eleven26/go-filesystem"
-	"github.com/eleven26/goss/core"
-	"github.com/eleven26/goss/utils"
+	"github.com/eleven26/goss/v2/core"
+	"github.com/eleven26/goss/v2/utils"
 	"github.com/huaweicloud/huaweicloud-sdk-go-obs/obs"
 	"github.com/stretchr/testify/assert"
 )

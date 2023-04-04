@@ -9,7 +9,7 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	"github.com/eleven26/goss/core"
+	"github.com/eleven26/goss/v2/core"
 )
 
 type Store struct {

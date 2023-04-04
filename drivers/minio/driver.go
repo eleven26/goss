@@ -1,7 +1,7 @@
 package minio
 
 import (
-	"github.com/eleven26/goss/core"
+	"github.com/eleven26/goss/v2/core"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/spf13/viper"

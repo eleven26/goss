@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/eleven26/goss/core"
+	"github.com/eleven26/goss/v2/core"
 )
 
 func NewListObjectResult(entries []*s3.Object, hasNext bool) *core.ListObjectResult {

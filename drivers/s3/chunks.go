@@ -3,7 +3,7 @@ package s3
 import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/eleven26/goss/core"
+	"github.com/eleven26/goss/v2/core"
 )
 
 type Chunks struct {

@@ -3,7 +3,7 @@ package huawei
 import (
 	"io"
 
-	"github.com/eleven26/goss/core"
+	"github.com/eleven26/goss/v2/core"
 	"github.com/huaweicloud/huaweicloud-sdk-go-obs/obs"
 )
 

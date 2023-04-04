@@ -1,8 +1,8 @@
-module github.com/eleven26/goss
+module github.com/eleven26/goss/v2
 
 go 1.18
 
-retract v1.0.0
+retract v2.0.0
 
 require (
 	github.com/aliyun/aliyun-oss-go-sdk v2.2.4+incompatible

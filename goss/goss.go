@@ -1,8 +1,8 @@
 package goss
 
 import (
-	"github.com/eleven26/goss/core"
-	"github.com/eleven26/goss/internal/config"
+	"github.com/eleven26/goss/v2/core"
+	"github.com/eleven26/goss/v2/internal/config"
 	"github.com/spf13/viper"
 )
 

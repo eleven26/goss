@@ -13,10 +13,10 @@ import (
 	"testing"
 	"time"
 
-	config2 "github.com/eleven26/goss/internal/config"
+	config2 "github.com/eleven26/goss/v2/internal/config"
 
-	"github.com/eleven26/goss/core"
-	"github.com/eleven26/goss/utils"
+	"github.com/eleven26/goss/v2/core"
+	"github.com/eleven26/goss/v2/utils"
 
 	fs "github.com/eleven26/go-filesystem"
 	"github.com/stretchr/testify/assert"

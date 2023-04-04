@@ -3,13 +3,13 @@ package goss
 import (
 	"fmt"
 
-	"github.com/eleven26/goss/core"
-	"github.com/eleven26/goss/drivers/aliyun"
-	"github.com/eleven26/goss/drivers/huawei"
-	"github.com/eleven26/goss/drivers/minio"
-	"github.com/eleven26/goss/drivers/qiniu"
-	"github.com/eleven26/goss/drivers/s3"
-	"github.com/eleven26/goss/drivers/tencent"
+	"github.com/eleven26/goss/v2/core"
+	"github.com/eleven26/goss/v2/drivers/aliyun"
+	"github.com/eleven26/goss/v2/drivers/huawei"
+	"github.com/eleven26/goss/v2/drivers/minio"
+	"github.com/eleven26/goss/v2/drivers/qiniu"
+	"github.com/eleven26/goss/v2/drivers/s3"
+	"github.com/eleven26/goss/v2/drivers/tencent"
 )
 
 const (

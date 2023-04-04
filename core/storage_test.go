@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/eleven26/goss/utils"
+	"github.com/eleven26/goss/v2/utils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )

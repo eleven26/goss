@@ -3,7 +3,7 @@ package minio
 import (
 	"context"
 
-	"github.com/eleven26/goss/core"
+	"github.com/eleven26/goss/v2/core"
 	"github.com/minio/minio-go/v7"
 )
 

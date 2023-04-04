@@ -5,7 +5,7 @@ import (
 
 	"github.com/minio/minio-go/v7"
 
-	"github.com/eleven26/goss/core"
+	"github.com/eleven26/goss/v2/core"
 )
 
 func NewListObjectResult(entries []minio.ObjectInfo, hasNext bool) *core.ListObjectResult {
