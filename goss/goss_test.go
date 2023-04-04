@@ -64,7 +64,7 @@ func TestNewWithViper(t *testing.T) {
 	configPath, err = config.UserHomeConfigPath()
 	assert.Nil(t, err)
 
-	v, err = config.ReadInConfig(configPath)
+    v, err := config.ReadInConfig(configPath)
 	assert.Nil(t, err)
 
 	v.Set("driver", Aliyun)
