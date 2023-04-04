@@ -3,8 +3,6 @@ package goss
 import (
 	"errors"
 
-	"github.com/spf13/viper"
-
 	"github.com/eleven26/goss/core"
 	"github.com/eleven26/goss/drivers/aliyun"
 	"github.com/eleven26/goss/drivers/huawei"
@@ -32,13 +30,7 @@ var (
 )
 
 // defaultDriver get the driver specified by "driver" in the configuration file.
-func defaultDriver(opts ...core.Option) (core.Driver, error) {
-	if !viper.IsSet("driver") {
-		return nil, ErrNoDefaultDriver
-	}
-
-	driver := viper.GetString("driver")
-
+func defaultDriver(driver string, opts ...core.Option) (core.Driver, error) {
 	switch driver {
 	case Aliyun:
 		return aliyun.NewDriver(opts...), nil

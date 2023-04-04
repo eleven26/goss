@@ -14,8 +14,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/spf13/viper"
-
 	"github.com/minio/minio-go/v7"
 
 	config2 "github.com/eleven26/goss/config"
@@ -38,12 +36,10 @@ var (
 )
 
 func init() {
-	err := config2.ReadInUserHomeConfig()
+	vip, err := config2.ReadInUserHomeConfig()
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	vip := viper.GetViper()
 
 	d := NewDriver(core.WithViper(vip))
 	storage2, err = d.Storage()

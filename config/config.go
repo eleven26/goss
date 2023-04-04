@@ -13,25 +13,29 @@ import (
 const File = ".goss.yml"
 
 // ReadInConfig Load the configuration file from the specified path.
-func ReadInConfig(path string) error {
+func ReadInConfig(path string) (*viper.Viper, error) {
 	exist, err := fs.Exists(path)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if !exist {
-		return fmt.Errorf("Configuration file not exists：%s\n", path)
+		return nil, fmt.Errorf("Configuration file not exists：%s\n", path)
 	}
 
-	viper.SetConfigFile(path)
+	v := viper.New()
+	v.SetConfigFile(path)
+	if err := v.ReadInConfig(); err != nil {
+		return nil, err
+	}
 
-	return viper.ReadInConfig()
+	return v, nil
 }
 
 // ReadInUserHomeConfig Load the configuration file from user home directory.
-func ReadInUserHomeConfig() error {
+func ReadInUserHomeConfig() (*viper.Viper, error) {
 	path, err := UserHomeConfigPath()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	return ReadInConfig(path)
