@@ -11,8 +11,9 @@ import (
 	"reflect"
 	"testing"
 
+	config2 "github.com/eleven26/goss/internal/config"
+
 	fs "github.com/eleven26/go-filesystem"
-	config2 "github.com/eleven26/goss/config"
 	"github.com/eleven26/goss/core"
 	"github.com/eleven26/goss/utils"
 	"github.com/huaweicloud/huaweicloud-sdk-go-obs/obs"

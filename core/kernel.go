@@ -2,13 +2,10 @@ package core
 
 import (
 	"strings"
-
-	"github.com/spf13/viper"
 )
 
 // Kernel is the core struct of goss, it plays the role of a driver manager.
 type Kernel struct {
-	driver   string
 	storages Storages
 	Storage  Storage
 }
@@ -16,7 +13,6 @@ type Kernel struct {
 // New create a new instance of Kernel.
 func New() Kernel {
 	app := Kernel{
-		driver:   strings.ToLower(viper.GetString("driver")),
 		storages: Storages{},
 	}
 

@@ -13,9 +13,10 @@ import (
 	"testing"
 	"time"
 
+	config2 "github.com/eleven26/goss/internal/config"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
-	config2 "github.com/eleven26/goss/config"
 	"github.com/eleven26/goss/core"
 	"github.com/eleven26/goss/utils"
 

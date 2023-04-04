@@ -26,3 +26,5 @@ dist
 
 testdata/*
 !testdata/foo.txt
+
+coverage.html

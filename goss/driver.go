@@ -1,7 +1,7 @@
 package goss
 
 import (
-	"errors"
+	"fmt"
 
 	"github.com/eleven26/goss/core"
 	"github.com/eleven26/goss/drivers/aliyun"
@@ -21,14 +21,6 @@ const (
 	Minio   = "minio"
 )
 
-var (
-	// ErrNoDefaultDriver no default driver configured error.
-	ErrNoDefaultDriver = errors.New("no default driver set")
-
-	// ErrDriverNotExists driver not registered error.
-	ErrDriverNotExists = errors.New("driver not exists")
-)
-
 // defaultDriver get the driver specified by "driver" in the configuration file.
 func defaultDriver(driver string, opts ...core.Option) (core.Driver, error) {
 	switch driver {
@@ -45,6 +37,6 @@ func defaultDriver(driver string, opts ...core.Option) (core.Driver, error) {
 	case Minio:
 		return minio.NewDriver(opts...), nil
 	default:
-		return nil, ErrDriverNotExists
+		return nil, fmt.Errorf("driver not exists: %s", driver)
 	}
 }

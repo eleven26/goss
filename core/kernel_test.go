@@ -19,7 +19,6 @@ func (d DriverStub) Name() string {
 func TestNew(t *testing.T) {
 	kernel := New()
 
-	assert.Equal(t, kernel.driver, "")
 	assert.Nil(t, kernel.Storage)
 	assert.NotNil(t, kernel.storages)
 }
