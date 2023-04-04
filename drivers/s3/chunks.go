@@ -1,8 +1,10 @@
 package s3
 
 import (
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/s3"
+	"context"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/eleven26/goss/v2/core"
 )
 
@@ -10,11 +12,11 @@ type Chunks struct {
 	bucket string
 	prefix string
 
-	s3    *s3.S3
+	s3    *s3.Client
 	token *string
 }
 
-func NewChunks(bucket string, prefix string, s3 *s3.S3) core.Chunks {
+func NewChunks(bucket string, prefix string, s3 *s3.Client) core.Chunks {
 	return &Chunks{
 		bucket: bucket,
 		prefix: prefix,
@@ -29,12 +31,12 @@ func (c *Chunks) Chunk() (*core.ListObjectResult, error) {
 		Prefix:            aws.String(c.prefix),
 	}
 
-	output, err := c.s3.ListObjectsV2(input)
+	output, err := c.s3.ListObjectsV2(context.TODO(), input)
 	if err != nil {
 		return nil, err
 	}
 
 	c.token = output.ContinuationToken
 
-	return NewListObjectResult(output.Contents, *output.IsTruncated), nil
+	return NewListObjectResult(output.Contents, output.IsTruncated), nil
 }

@@ -3,11 +3,11 @@ package s3
 import (
 	"time"
 
-	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 )
 
 type File struct {
-	item *s3.Object
+	item types.Object
 }
 
 func (f *File) Key() string {
@@ -15,11 +15,11 @@ func (f *File) Key() string {
 }
 
 func (f *File) Type() string {
-	return *f.item.StorageClass
+	return string(f.item.StorageClass)
 }
 
 func (f *File) Size() int64 {
-	return *f.item.Size
+	return f.item.Size
 }
 
 func (f *File) ETag() string {

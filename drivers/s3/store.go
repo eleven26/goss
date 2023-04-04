@@ -2,18 +2,20 @@ package s3
 
 import (
 	"bytes"
+	"context"
 	"io"
-	"net/http"
 	"os"
+	"strings"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/smithy-go"
+
 	"github.com/eleven26/goss/v2/core"
 )
 
 type Store struct {
-	s3 *s3.S3
+	s3 *s3.Client
 	config
 }
 
@@ -32,7 +34,7 @@ func (s *Store) putFile(key string, f io.ReadSeeker) error {
 		Bucket: aws.String(s.Bucket),
 		Key:    aws.String(key),
 	}
-	_, err := s.s3.PutObject(input)
+	_, err := s.s3.PutObject(context.TODO(), input)
 
 	return err
 }
@@ -52,7 +54,7 @@ func (s *Store) getObject(key string) (*s3.GetObjectOutput, error) {
 		Key:    aws.String(key),
 	}
 
-	return s.s3.GetObject(input)
+	return s.s3.GetObject(context.TODO(), input)
 }
 
 func (s *Store) Get(key string) (io.ReadCloser, error) {
@@ -70,7 +72,7 @@ func (s *Store) head(key string) (*s3.HeadObjectOutput, error) {
 		Key:    aws.String(key),
 	}
 
-	return s.s3.HeadObject(input)
+	return s.s3.HeadObject(context.TODO(), input)
 }
 
 func (s *Store) Size(key string) (int64, error) {
@@ -79,17 +81,15 @@ func (s *Store) Size(key string) (int64, error) {
 		return 0, err
 	}
 
-	return *output.ContentLength, nil
+	return output.ContentLength, nil
 }
 
 func (s *Store) Exists(key string) (bool, error) {
 	_, err := s.head(key)
 	if err != nil {
-		if _, ok := err.(awserr.Error); ok {
-			if reqErr, ok := err.(awserr.RequestFailure); ok {
-				if reqErr.StatusCode() == http.StatusNotFound {
-					return false, nil
-				}
+		if e, ok := err.(*smithy.OperationError); ok {
+			if strings.Contains(e.Err.Error(), "404") {
+				return false, nil
 			}
 		}
 
@@ -105,7 +105,7 @@ func (s *Store) Delete(key string) error {
 		Key:    aws.String(key),
 	}
 
-	_, err := s.s3.DeleteObject(input)
+	_, err := s.s3.DeleteObject(context.TODO(), input)
 	if err != nil {
 		return err
 	}

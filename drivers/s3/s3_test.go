@@ -3,6 +3,7 @@
 package s3
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"log"
@@ -13,15 +14,14 @@ import (
 	"testing"
 	"time"
 
-	config2 "github.com/eleven26/goss/v2/internal/config"
-
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/eleven26/goss/v2/core"
-	"github.com/eleven26/goss/v2/utils"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/stretchr/testify/assert"
 
 	fs "github.com/eleven26/go-filesystem"
-	"github.com/stretchr/testify/assert"
+	"github.com/eleven26/goss/v2/core"
+	config2 "github.com/eleven26/goss/v2/internal/config"
+	"github.com/eleven26/goss/v2/utils"
 )
 
 var (
@@ -71,7 +71,7 @@ func deleteRemote(t *testing.T) {
 		Bucket: aws.String(store.Bucket),
 		Key:    aws.String(key),
 	}
-	_, err := store.s3.DeleteObject(input)
+	_, err := store.s3.DeleteObject(context.TODO(), input)
 	if err != nil {
 		t.Fatal(err)
 	}

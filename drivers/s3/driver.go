@@ -1,10 +1,12 @@
 package s3
 
 import (
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
+	"context"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	config2 "github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/credentials"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/eleven26/goss/v2/core"
 	"github.com/spf13/viper"
 )
@@ -30,26 +32,23 @@ func (d *Driver) Storage() (core.Storage, error) {
 		return nil, core.ErrorConfigEmpty
 	}
 
-	creds := credentials.NewStaticCredentials(conf.AccessKey, conf.SecretKey, "")
-	_, err := creds.Get()
+	customResolver := aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...interface{}) (aws.Endpoint, error) {
+		return aws.Endpoint{
+			PartitionID:   "oss",
+			URL:           "https://" + conf.Endpoint,
+			SigningRegion: conf.Region,
+		}, nil
+	})
+	creds := credentials.NewStaticCredentialsProvider(conf.AccessKey, conf.SecretKey, "")
+	cfg, err := config2.LoadDefaultConfig(context.TODO(), config2.WithCredentialsProvider(creds), config2.WithEndpointResolverWithOptions(customResolver))
 	if err != nil {
 		return nil, err
 	}
 
-	awsConfig := &aws.Config{
-		Region:      aws.String(conf.Region),
-		Endpoint:    aws.String(conf.Endpoint),
-		DisableSSL:  aws.Bool(true),
-		Credentials: creds,
-	}
-	sess, err := session.NewSession(awsConfig)
-	if err != nil {
-		return nil, err
-	}
-	svc := s3.New(sess)
+	client := s3.NewFromConfig(cfg)
 
 	store := Store{
-		s3:     svc,
+		s3:     client,
 		config: *conf,
 	}
 
