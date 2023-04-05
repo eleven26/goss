@@ -8,7 +8,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"testing"
@@ -25,7 +24,6 @@ var (
 	s *store
 
 	key          = "test/foo.txt"
-	testdata     string
 	fooPath      string
 	localFooPath string
 )
@@ -48,9 +46,27 @@ func init() {
 
 	s = storage.(*store)
 
-	testdata = filepath.Join("testdata")
-	fooPath = filepath.Join(testdata, "foo.txt")
-	localFooPath = filepath.Join(testdata, "foo1.txt")
+	createTempFiles()
+}
+
+func createTempFiles() {
+	f1, err := os.CreateTemp("", "goss")
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = f1.WriteString("foo")
+	if err != nil {
+		log.Fatal(err)
+	}
+	f2, err := os.CreateTemp("", "goss")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fooPath = f1.Name()
+	localFooPath = f2.Name()
+
+	_ = f2.Close()
 }
 
 func setUp(t *testing.T) {
