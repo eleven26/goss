@@ -12,22 +12,22 @@ import (
 	"github.com/aws/smithy-go"
 )
 
-var _ Storage = &Store{}
+var _ Storage = &store{}
 
-type Store struct {
+type store struct {
 	s3     *s3.Client
 	Bucket string
 }
 
-func (s *Store) Files(dir string) ([]File, error) {
+func (s *store) Files(dir string) ([]File, error) {
 	return newFileIterator(newChunks(s.Bucket, dir, s.s3)).All()
 }
 
-func (s *Store) Store() interface{} {
+func (s *store) Store() interface{} {
 	return s
 }
 
-func (s *Store) Put(key string, r io.Reader) error {
+func (s *store) Put(key string, r io.Reader) error {
 	bs, err := io.ReadAll(r)
 	if err != nil {
 		return err
@@ -36,7 +36,7 @@ func (s *Store) Put(key string, r io.Reader) error {
 	return s.putFile(key, bytes.NewReader(bs))
 }
 
-func (s *Store) putFile(key string, f io.ReadSeeker) error {
+func (s *store) putFile(key string, f io.ReadSeeker) error {
 	input := &s3.PutObjectInput{
 		Body:   f,
 		Bucket: aws.String(s.Bucket),
@@ -47,7 +47,7 @@ func (s *Store) putFile(key string, f io.ReadSeeker) error {
 	return err
 }
 
-func (s *Store) PutFromFile(key string, localPath string) error {
+func (s *store) PutFromFile(key string, localPath string) error {
 	f, err := os.Open(localPath)
 	if err != nil {
 		return err
@@ -56,7 +56,7 @@ func (s *Store) PutFromFile(key string, localPath string) error {
 	return s.putFile(key, f)
 }
 
-func (s *Store) getObject(key string) (*s3.GetObjectOutput, error) {
+func (s *store) getObject(key string) (*s3.GetObjectOutput, error) {
 	input := &s3.GetObjectInput{
 		Bucket: aws.String(s.Bucket),
 		Key:    aws.String(key),
@@ -65,7 +65,7 @@ func (s *Store) getObject(key string) (*s3.GetObjectOutput, error) {
 	return s.s3.GetObject(context.TODO(), input)
 }
 
-func (s *Store) Get(key string) (io.ReadCloser, error) {
+func (s *store) Get(key string) (io.ReadCloser, error) {
 	output, err := s.getObject(key)
 	if err != nil {
 		return nil, err
@@ -74,7 +74,7 @@ func (s *Store) Get(key string) (io.ReadCloser, error) {
 	return output.Body, nil
 }
 
-func (s *Store) head(key string) (*s3.HeadObjectOutput, error) {
+func (s *store) head(key string) (*s3.HeadObjectOutput, error) {
 	input := &s3.HeadObjectInput{
 		Bucket: aws.String(s.Bucket),
 		Key:    aws.String(key),
@@ -83,7 +83,7 @@ func (s *Store) head(key string) (*s3.HeadObjectOutput, error) {
 	return s.s3.HeadObject(context.TODO(), input)
 }
 
-func (s *Store) Size(key string) (int64, error) {
+func (s *store) Size(key string) (int64, error) {
 	output, err := s.head(key)
 	if err != nil {
 		return 0, err
@@ -92,7 +92,7 @@ func (s *Store) Size(key string) (int64, error) {
 	return output.ContentLength, nil
 }
 
-func (s *Store) Exists(key string) (bool, error) {
+func (s *store) Exists(key string) (bool, error) {
 	_, err := s.head(key)
 	if err != nil {
 		if e, ok := err.(*smithy.OperationError); ok {
@@ -107,7 +107,7 @@ func (s *Store) Exists(key string) (bool, error) {
 	return true, nil
 }
 
-func (s *Store) Delete(key string) error {
+func (s *store) Delete(key string) error {
 	input := &s3.DeleteObjectInput{
 		Bucket: aws.String(s.Bucket),
 		Key:    aws.String(key),
@@ -122,7 +122,7 @@ func (s *Store) Delete(key string) error {
 }
 
 // GetBytes gets the file pointed to by key and returns a byte array.
-func (s *Store) GetBytes(key string) (bytes []byte, err error) {
+func (s *store) GetBytes(key string) (bytes []byte, err error) {
 	rc, err := s.Get(key)
 	if err != nil {
 		return
@@ -136,7 +136,7 @@ func (s *Store) GetBytes(key string) (bytes []byte, err error) {
 }
 
 // GetString gets the file pointed to by key and returns a string.
-func (s *Store) GetString(key string) (string, error) {
+func (s *store) GetString(key string) (string, error) {
 	bs, err := s.GetBytes(key)
 	if err != nil {
 		return "", err
@@ -146,7 +146,7 @@ func (s *Store) GetString(key string) (string, error) {
 }
 
 // GetToFile saves the file pointed to by key to the localPath.
-func (s *Store) GetToFile(key string, localPath string) (err error) {
+func (s *store) GetToFile(key string, localPath string) (err error) {
 	rc, err := s.Get(key)
 	if err != nil {
 		return err

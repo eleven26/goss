@@ -22,7 +22,7 @@ import (
 var (
 	storage Storage
 
-	store *Store
+	s *store
 
 	key          = "test/foo.txt"
 	testdata     string
@@ -44,9 +44,9 @@ func init() {
 		log.Fatal(err)
 	}
 
-	storage = goss.Storage
+	storage = goss
 
-	store = storage.Store().(*Store)
+	s = storage.(*store)
 
 	testdata = filepath.Join("testdata")
 	fooPath = filepath.Join(testdata, "foo.txt")
@@ -67,10 +67,10 @@ func tearDown(t *testing.T) {
 
 func deleteRemote(t *testing.T) {
 	input := &s3.DeleteObjectInput{
-		Bucket: aws.String(store.Bucket),
+		Bucket: aws.String(s.Bucket),
 		Key:    aws.String(key),
 	}
-	_, err := store.s3.DeleteObject(context.TODO(), input)
+	_, err := s.s3.DeleteObject(context.TODO(), input)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -112,7 +112,7 @@ func TestPut(t *testing.T) {
 	err = storage.Put(key, f)
 	assert.Nil(t, err)
 
-	_, err = store.getObject(key)
+	_, err = s.getObject(key)
 	assert.Nil(t, err)
 }
 
@@ -122,7 +122,7 @@ func TestPutFromFile(t *testing.T) {
 	err := storage.PutFromFile(key, fooPath)
 	assert.Nil(t, err)
 
-	_, err = store.getObject(key)
+	_, err = s.getObject(key)
 	assert.Nil(t, err)
 }
 
@@ -165,7 +165,7 @@ func TestDelete(t *testing.T) {
 	err := storage.Delete(key)
 	assert.Nil(t, err)
 
-	_, err = store.getObject(key)
+	_, err = s.getObject(key)
 	assert.NotNil(t, err)
 }
 

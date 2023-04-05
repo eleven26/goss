@@ -41,9 +41,6 @@ type Storage interface {
 
 	// Size fet the file size.
 	Size(key string) (int64, error)
-
-	// Store is an instance for calling APIs of different cloud storage service providers.
-	Store() interface{}
 }
 
 func newStorage(conf *Config) (Storage, error) {
@@ -67,10 +64,8 @@ func newStorage(conf *Config) (Storage, error) {
 
 	client := s3.NewFromConfig(cfg)
 
-	store := Store{
+	return &store{
 		s3:     client,
 		Bucket: conf.Bucket,
-	}
-
-	return &store, nil
+	}, nil
 }
