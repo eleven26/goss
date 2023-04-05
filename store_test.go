@@ -20,7 +20,7 @@ import (
 )
 
 var (
-	storage Storage
+	storage Store
 
 	s *store
 
@@ -44,7 +44,7 @@ func init() {
 		log.Fatal(err)
 	}
 
-	storage = goss
+	storage = goss.Store
 
 	s = storage.(*store)
 

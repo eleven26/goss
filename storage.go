@@ -10,8 +10,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
-// Storage defines a unified interface for reading and writing cloud storage objects.
-type Storage interface {
+// Store defines a unified interface for reading and writing cloud storage objects.
+type Store interface {
 	// Put saves the content read from r to the key of oss.
 	Put(key string, r io.Reader) error
 
@@ -43,7 +43,7 @@ type Storage interface {
 	Size(key string) (int64, error)
 }
 
-func newStorage(conf *Config) (Storage, error) {
+func newStorage(conf *Config) (Store, error) {
 	customResolver := aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...interface{}) (aws.Endpoint, error) {
 		return aws.Endpoint{
 			HostnameImmutable: conf.hostnameImmutable(),

@@ -2,7 +2,7 @@ package goss
 
 type Goss struct {
 	config *Config
-	Storage
+	Store
 }
 
 func New(opts ...Option) (*Goss, error) {
@@ -17,7 +17,7 @@ func New(opts ...Option) (*Goss, error) {
 		return nil, err
 	}
 
-	goss.Storage, err = newStorage(goss.config)
+	goss.Store, err = newStorage(goss.config)
 	if err != nil {
 		return nil, err
 	}

@@ -12,7 +12,7 @@ import (
 	"github.com/aws/smithy-go"
 )
 
-var _ Storage = &store{}
+var _ Store = &store{}
 
 type store struct {
 	s3     *s3.Client

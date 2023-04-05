@@ -6,7 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 )
 
-// File A slice of File is returned when all files are fetched through Storage.Files.
+// File A slice of File is returned when all files are fetched through Store.Files.
 // File hides differences in object returns from different cloud storage providers,
 // but at the same time, it can only return less information.
 type File interface {
