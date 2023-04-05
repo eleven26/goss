@@ -1,4 +1,4 @@
-package core
+package goss
 
 // FileIterator is an iterator used to iterate over all objects in the cloud.
 type FileIterator interface {
@@ -8,7 +8,7 @@ type FileIterator interface {
 
 // Chunks is used to get the next "page" of objects.
 type Chunks interface {
-	Chunk() (*ListObjectResult, error)
+	Chunk() (*listObjectResult, error)
 }
 
 // fileIterator is the iterator used to iterate over all matching objects.
@@ -22,8 +22,8 @@ type fileIterator struct {
 	files []File
 }
 
-// NewFileIterator creates an instance of FileIterator.
-func NewFileIterator(chunks Chunks) FileIterator {
+// newFileIterator creates an instance of FileIterator.
+func newFileIterator(chunks Chunks) FileIterator {
 	return &fileIterator{
 		chunks: chunks,
 	}

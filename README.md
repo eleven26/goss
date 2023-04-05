@@ -243,3 +243,11 @@ size, err := storage.Size("test/test.txt")
 4. [华为云对象存储](https://support.huaweicloud.com/obs/index.html)
 5. [aws s3](https://docs.aws.amazon.com/sdk-for-go/api/service/s3/)
 6. [minio](https://github.com/minio/minio)
+
+## 各云厂商对 s3 的支持
+
+1. [阿里云: OSS与Amazon S3的兼容性](https://help.aliyun.com/document_detail/389025.html)
+2. [腾讯云: 使用 AWS S3 SDK 访问 COS](https://cloud.tencent.com/document/product/436/37421)
+3. [七牛云: AWS S3 兼容](https://developer.qiniu.com/kodo/4086/aws-s3-compatible)
+4. 华为云：支持 s3，但是官网文档找不到相关关于 s3 兼容的相关描述
+5. [minio: AWS S3 Compatibility](https://min.io/product/s3-compatibility)

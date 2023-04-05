@@ -1,14 +1,13 @@
-package s3
+package goss
 
 import (
 	"context"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/eleven26/goss/v2/core"
 )
 
-type Chunks struct {
+type chunks struct {
 	bucket string
 	prefix string
 
@@ -16,15 +15,15 @@ type Chunks struct {
 	token *string
 }
 
-func NewChunks(bucket string, prefix string, s3 *s3.Client) core.Chunks {
-	return &Chunks{
+func newChunks(bucket string, prefix string, s3 *s3.Client) Chunks {
+	return &chunks{
 		bucket: bucket,
 		prefix: prefix,
 		s3:     s3,
 	}
 }
 
-func (c *Chunks) Chunk() (*core.ListObjectResult, error) {
+func (c *chunks) Chunk() (*listObjectResult, error) {
 	input := &s3.ListObjectsV2Input{
 		Bucket:            aws.String(c.bucket),
 		ContinuationToken: c.token,
@@ -38,5 +37,5 @@ func (c *Chunks) Chunk() (*core.ListObjectResult, error) {
 
 	c.token = output.ContinuationToken
 
-	return NewListObjectResult(output.Contents, output.IsTruncated), nil
+	return newListObjectResult(output.Contents, output.IsTruncated), nil
 }

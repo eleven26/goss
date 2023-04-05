@@ -1,6 +1,10 @@
-package core
+package goss
 
-import "time"
+import (
+	"time"
+
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
+)
 
 // File A slice of File is returned when all files are fetched through Storage.Files.
 // File hides differences in object returns from different cloud storage providers,
@@ -20,4 +24,28 @@ type File interface {
 
 	// LastModified is the time when the object was last updated.
 	LastModified() time.Time
+}
+
+type file struct {
+	item types.Object
+}
+
+func (f *file) Key() string {
+	return *f.item.Key
+}
+
+func (f *file) Type() string {
+	return string(f.item.StorageClass)
+}
+
+func (f *file) Size() int64 {
+	return f.item.Size
+}
+
+func (f *file) ETag() string {
+	return *f.item.ETag
+}
+
+func (f *file) LastModified() time.Time {
+	return *f.item.LastModified
 }

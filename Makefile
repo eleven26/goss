@@ -16,17 +16,11 @@ format:
 
 .PHONY: test
 test:
-	go test -v ./core/* -cover
+	go test -v ./... -cover
 
 .PHONY: integration
 integration:
-	go test -v ./drivers/aliyun -cover -tags=integration
-	go test -v ./drivers/huawei -cover -tags=integration
-	go test -v ./drivers/tencent -cover -tags=integration
-	go test -v ./drivers/qiniu -cover -tags=integration_qiniu
-	go test -v ./drivers/minio -cover -tags=integration
-	go test -v ./drivers/s3 -cover -tags=integration
-	go test -v ./goss/* -cover -tags=integration
+	go test -v . -cover -tags=integration
 
 .PHONY: all
 all:

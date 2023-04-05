@@ -1,6 +1,6 @@
 //go:build integration
 
-package s3
+package goss
 
 import (
 	"context"
@@ -17,15 +17,10 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/stretchr/testify/assert"
-
-	fs "github.com/eleven26/go-filesystem"
-	"github.com/eleven26/goss/v2/core"
-	config2 "github.com/eleven26/goss/v2/internal/config"
-	"github.com/eleven26/goss/v2/utils"
 )
 
 var (
-	storage2 core.Storage
+	storage Storage
 
 	store *Store
 
@@ -36,26 +31,30 @@ var (
 )
 
 func init() {
-	vip, err := config2.ReadInUserHomeConfig()
+	goss, err := New(WithConfig(&Config{
+		Endpoint:          os.Getenv("GOSS_ENDPOINT"),
+		AccessKey:         os.Getenv("GOSS_ACCESS_KEY"),
+		SecretKey:         os.Getenv("GOSS_SECRET_KEY"),
+		Region:            os.Getenv("GOSS_REGION"),
+		Bucket:            os.Getenv("GOSS_BUCKET"),
+		UseSsl:            aws.Bool(true),
+		HostnameImmutable: aws.Bool(false),
+	}))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	d := NewDriver(core.WithViper(vip))
-	storage2, err = d.Storage()
-	if err != nil {
-		log.Fatal(err)
-	}
+	storage = goss.Storage
 
-	store = storage2.Store().(*Store)
+	store = storage.Store().(*Store)
 
-	testdata = filepath.Join(utils.RootDir(), "testdata")
+	testdata = filepath.Join("testdata")
 	fooPath = filepath.Join(testdata, "foo.txt")
 	localFooPath = filepath.Join(testdata, "foo1.txt")
 }
 
 func setUp(t *testing.T) {
-	err := storage2.PutFromFile(key, fooPath)
+	err := storage.PutFromFile(key, fooPath)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -77,10 +76,19 @@ func deleteRemote(t *testing.T) {
 	}
 }
 
+func fileExists(filename string) bool {
+	_, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		return false
+	}
+
+	return true
+}
+
 func deleteLocal(t *testing.T) {
-	exists, _ := fs.Exists(localFooPath)
+	exists := fileExists(localFooPath)
 	if exists {
-		err := fs.Delete(localFooPath)
+		err := os.Remove(localFooPath)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -101,7 +109,7 @@ func TestPut(t *testing.T) {
 		}
 	}(f)
 
-	err = storage2.Put(key, f)
+	err = storage.Put(key, f)
 	assert.Nil(t, err)
 
 	_, err = store.getObject(key)
@@ -111,7 +119,7 @@ func TestPut(t *testing.T) {
 func TestPutFromFile(t *testing.T) {
 	defer tearDown(t)
 
-	err := storage2.PutFromFile(key, fooPath)
+	err := storage.PutFromFile(key, fooPath)
 	assert.Nil(t, err)
 
 	_, err = store.getObject(key)
@@ -122,7 +130,7 @@ func TestGet(t *testing.T) {
 	setUp(t)
 	defer tearDown(t)
 
-	rc, err := storage2.Get(key)
+	rc, err := storage.Get(key)
 	assert.Nil(t, err)
 
 	bs, err := io.ReadAll(rc)
@@ -134,7 +142,7 @@ func TestGetString(t *testing.T) {
 	setUp(t)
 	defer tearDown(t)
 
-	content, err := storage2.GetString(key)
+	content, err := storage.GetString(key)
 
 	assert.Nil(t, err)
 	assert.Equal(t, "foo", content)
@@ -144,7 +152,7 @@ func TestGetBytes(t *testing.T) {
 	setUp(t)
 	defer tearDown(t)
 
-	bs, err := storage2.GetBytes(key)
+	bs, err := storage.GetBytes(key)
 
 	assert.Nil(t, err)
 	assert.Equal(t, "foo", string(bs))
@@ -154,7 +162,7 @@ func TestDelete(t *testing.T) {
 	setUp(t)
 	defer deleteLocal(t)
 
-	err := storage2.Delete(key)
+	err := storage.Delete(key)
 	assert.Nil(t, err)
 
 	_, err = store.getObject(key)
@@ -165,21 +173,24 @@ func TestSave(t *testing.T) {
 	setUp(t)
 	defer tearDown(t)
 
-	err := storage2.GetToFile(key, localFooPath)
+	err := storage.GetToFile(key, localFooPath)
 	assert.Nil(t, err)
-	assert.Equal(t, "foo", fs.MustGetString(localFooPath))
+
+	bs, err := os.ReadFile(localFooPath)
+	assert.Nil(t, err)
+	assert.Equal(t, "foo", string(bs))
 }
 
 func TestExists(t *testing.T) {
 	setUp(t)
 	defer tearDown(t)
 
-	exists, err := storage2.Exists(key)
+	exists, err := storage.Exists(key)
 
 	assert.Nil(t, err)
 	assert.True(t, exists)
 
-	exists, err = storage2.Exists(key + "not_exists")
+	exists, err = storage.Exists(key + "not_exists")
 
 	assert.Nil(t, err)
 	assert.False(t, exists)
@@ -189,7 +200,7 @@ func TestSize(t *testing.T) {
 	setUp(t)
 	defer tearDown(t)
 
-	size, err := storage2.Size(key)
+	size, err := storage.Size(key)
 
 	var siz int64 = 3
 	assert.Nil(t, err)
@@ -200,7 +211,7 @@ func TestFiles(t *testing.T) {
 	setUp(t)
 	defer tearDown(t)
 
-	files, err := storage2.Files("test/")
+	files, err := storage.Files("test/")
 	assert.Nil(t, err)
 	assert.Len(t, files, 1)
 
@@ -216,7 +227,7 @@ func sTestAb(t *testing.T) {
 	dir := "test_all/"
 
 	for i := 1; i <= 200; i++ {
-		err := storage2.Put(fmt.Sprintf("%s%s.txt", dir, strconv.Itoa(i)), strings.NewReader("foo"))
+		err := storage.Put(fmt.Sprintf("%s%s.txt", dir, strconv.Itoa(i)), strings.NewReader("foo"))
 		assert.Nil(t, err)
 	}
 }
@@ -225,7 +236,7 @@ func TestFilesWithMultiPage(t *testing.T) {
 	// Testdata was prepared before.
 	dir := "test_all/"
 
-	files, err := storage2.Files(dir)
+	files, err := storage.Files(dir)
 	assert.Nil(t, err)
 	assert.Len(t, files, 200)
 }

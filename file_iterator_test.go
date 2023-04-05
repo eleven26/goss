@@ -1,4 +1,4 @@
-package core
+package goss
 
 import (
 	"testing"
@@ -11,21 +11,21 @@ type ChunksStub struct {
 	mock.Mock
 }
 
-func (c *ChunksStub) Chunk() (*ListObjectResult, error) {
+func (c *ChunksStub) Chunk() (*listObjectResult, error) {
 	args := c.Called()
 
-	return args.Get(0).(*ListObjectResult), args.Error(1)
+	return args.Get(0).(*listObjectResult), args.Error(1)
 }
 
 func TestNewFileIterator(t *testing.T) {
 	chunks := new(ChunksStub)
-	fi := NewFileIterator(chunks)
+	fi := newFileIterator(chunks)
 
 	assert.Equal(t, chunks, fi.(*fileIterator).chunks)
 }
 
 func TestNotHasNext(t *testing.T) {
-	result := &ListObjectResult{}
+	result := &listObjectResult{}
 
 	chunks := new(ChunksStub)
 	chunks.On("Chunk").Return(result, nil)
@@ -39,7 +39,7 @@ func TestNotHasNext(t *testing.T) {
 }
 
 func TestHasNext(t *testing.T) {
-	result := &ListObjectResult{
+	result := &listObjectResult{
 		Files:      make([]File, 1),
 		IsFinished: false,
 	}
@@ -56,7 +56,7 @@ func TestHasNext(t *testing.T) {
 }
 
 func TestNotHasNext1(t *testing.T) {
-	emptyResult := &ListObjectResult{}
+	emptyResult := &listObjectResult{}
 
 	chunks := new(ChunksStub)
 	chunks.On("Chunk").Return(emptyResult, nil)
@@ -78,7 +78,7 @@ func TestNotHasNext1(t *testing.T) {
 }
 
 func TestGetNextChunk(t *testing.T) {
-	result := &ListObjectResult{
+	result := &listObjectResult{
 		Files:      make([]File, 1),
 		IsFinished: false,
 	}
@@ -96,7 +96,7 @@ func TestGetNextChunk(t *testing.T) {
 }
 
 func TestAll(t *testing.T) {
-	result := &ListObjectResult{
+	result := &listObjectResult{
 		Files:      make([]File, 2),
 		IsFinished: true,
 	}

@@ -1,4 +1,4 @@
-package s3
+package goss
 
 import (
 	"bytes"
@@ -10,13 +10,21 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/smithy-go"
-
-	"github.com/eleven26/goss/v2/core"
 )
 
+var _ Storage = &Store{}
+
 type Store struct {
-	s3 *s3.Client
-	config
+	s3     *s3.Client
+	Bucket string
+}
+
+func (s *Store) Files(dir string) ([]File, error) {
+	return newFileIterator(newChunks(s.Bucket, dir, s.s3)).All()
+}
+
+func (s *Store) Store() interface{} {
+	return s
 }
 
 func (s *Store) Put(key string, r io.Reader) error {
@@ -113,6 +121,47 @@ func (s *Store) Delete(key string) error {
 	return nil
 }
 
-func (s *Store) Iterator(prefix string) core.FileIterator {
-	return core.NewFileIterator(NewChunks(s.Bucket, prefix, s.s3))
+// GetBytes gets the file pointed to by key and returns a byte array.
+func (s *Store) GetBytes(key string) (bytes []byte, err error) {
+	rc, err := s.Get(key)
+	if err != nil {
+		return
+	}
+
+	defer func() {
+		err = rc.Close()
+	}()
+
+	return io.ReadAll(rc)
+}
+
+// GetString gets the file pointed to by key and returns a string.
+func (s *Store) GetString(key string) (string, error) {
+	bs, err := s.GetBytes(key)
+	if err != nil {
+		return "", err
+	}
+
+	return string(bs), nil
+}
+
+// GetToFile saves the file pointed to by key to the localPath.
+func (s *Store) GetToFile(key string, localPath string) (err error) {
+	rc, err := s.Get(key)
+	if err != nil {
+		return err
+	}
+
+	defer func(rc io.ReadCloser) {
+		err = rc.Close()
+	}(rc)
+
+	f, _ := os.OpenFile(localPath, os.O_CREATE|os.O_WRONLY, 0o644)
+	defer func(f *os.File) {
+		err = f.Close()
+	}(f)
+
+	_, err = io.Copy(f, rc)
+
+	return err
 }
