@@ -38,7 +38,7 @@ func (c *chunks) Chunk() (*listObjectResult, error) {
 		return nil, err
 	}
 
-	c.token = output.ContinuationToken
+	c.token = output.NextContinuationToken
 
 	return newListObjectResult(output.Contents, output.IsTruncated), nil
 }

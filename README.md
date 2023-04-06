@@ -171,7 +171,7 @@ exists, err := goss.Exists("test/test.txt")
 
 根据前缀获取文件列表。
 
-> minio 最多返回 1000 个，其他的有多少返回多少。
+> 目前最多返回 1000 个。
 
 ```go
 exists, err := goss.Files("test/")
