@@ -5,13 +5,13 @@ import (
 )
 
 type Config struct {
-	Endpoint          string
-	AccessKey         string
-	SecretKey         string
-	Region            string
-	Bucket            string
-	UseSsl            *bool
-	HostnameImmutable *bool
+	Endpoint          string `yaml:"endpoint"`
+	AccessKey         string `yaml:"access_key"`
+	SecretKey         string `yaml:"secret_key"`
+	Region            string `yaml:"region"`
+	Bucket            string `yaml:"bucket"`
+	UseSsl            *bool  `yaml:"use_ssl"`
+	HostnameImmutable *bool  `yaml:"hostname_immutable"`
 }
 
 func (c *Config) validate() error {
@@ -23,14 +23,18 @@ func (c *Config) validate() error {
 }
 
 func (c *Config) url() string {
-	prefix := "http://"
-	if *c.UseSsl {
-		prefix = "https://"
+	prefix := "https://"
+	if c.UseSsl != nil && !*c.UseSsl {
+		prefix = "http://"
 	}
 
 	return prefix + c.Endpoint
 }
 
 func (c *Config) hostnameImmutable() bool {
-	return *c.HostnameImmutable
+	if c.HostnameImmutable != nil {
+		return *c.HostnameImmutable
+	}
+
+	return false
 }

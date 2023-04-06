@@ -20,7 +20,8 @@ test:
 
 .PHONY: integration
 integration:
-	go test -v . -cover -tags=integration
+	go test -v . -cover -coverprofile=coverage.out -tags=integration
+	go tool cover -html=coverage.out -o coverage.html
 
 .PHONY: all
 all:

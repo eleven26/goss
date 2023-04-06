@@ -8,6 +8,8 @@ import (
 	"io"
 	"log"
 	"os"
+	"os/user"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"testing"
@@ -16,38 +18,15 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
+	"gopkg.in/yaml.v2"
 )
 
 var (
-	storage Store
-
-	s *store
-
 	key          = "test/foo.txt"
 	fooPath      string
 	localFooPath string
 )
-
-func init() {
-	goss, err := New(WithConfig(&Config{
-		Endpoint:          os.Getenv("GOSS_ENDPOINT"),
-		AccessKey:         os.Getenv("GOSS_ACCESS_KEY"),
-		SecretKey:         os.Getenv("GOSS_SECRET_KEY"),
-		Region:            os.Getenv("GOSS_REGION"),
-		Bucket:            os.Getenv("GOSS_BUCKET"),
-		UseSsl:            aws.Bool(true),
-		HostnameImmutable: aws.Bool(false),
-	}))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	storage = goss.Store
-
-	s = storage.(*store)
-
-	createTempFiles()
-}
 
 func createTempFiles() {
 	f1, err := os.CreateTemp("", "goss")
@@ -69,29 +48,6 @@ func createTempFiles() {
 	_ = f2.Close()
 }
 
-func setUp(t *testing.T) {
-	err := storage.PutFromFile(key, fooPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-}
-
-func tearDown(t *testing.T) {
-	deleteLocal(t)
-	deleteRemote(t)
-}
-
-func deleteRemote(t *testing.T) {
-	input := &s3.DeleteObjectInput{
-		Bucket: aws.String(s.Bucket),
-		Key:    aws.String(key),
-	}
-	_, err := s.s3.DeleteObject(context.TODO(), input)
-	if err != nil {
-		t.Fatal(err)
-	}
-}
-
 func fileExists(filename string) bool {
 	_, err := os.Stat(filename)
 	if os.IsNotExist(err) {
@@ -101,18 +57,55 @@ func fileExists(filename string) bool {
 	return true
 }
 
-func deleteLocal(t *testing.T) {
+type GossTestSuite struct {
+	suite.Suite
+
+	config  Config
+	storage Store
+	store   *store
+}
+
+func (s *GossTestSuite) SetupTest() {
+	// 临时文件创建
+	createTempFiles()
+
+	goss, err := New(WithConfig(&s.config))
+	if err != nil {
+		s.T().Fatal(err)
+	}
+	s.storage = goss.Store
+	s.store = s.storage.(*store)
+
+	// 临时文件创建
+	err = s.storage.PutFromFile(key, fooPath)
+	if err != nil {
+		s.T().Fatal(err)
+	}
+}
+
+func (s *GossTestSuite) TearDownTest() {
+	// 本地临时文件删除
 	exists := fileExists(localFooPath)
 	if exists {
 		err := os.Remove(localFooPath)
 		if err != nil {
-			t.Fatal(err)
+			s.T().Fatal(err)
 		}
+	}
+
+	// 远程临时文件删除
+	input := &s3.DeleteObjectInput{
+		Bucket: aws.String(s.store.Bucket),
+		Key:    aws.String(key),
+	}
+	_, err := s.store.s3.DeleteObject(context.TODO(), input)
+	if err != nil {
+		s.T().Fatal(err)
 	}
 }
 
-func TestPut(t *testing.T) {
-	defer tearDown(t)
+func (s *GossTestSuite) TestPut() {
+	t := s.T()
 
 	f, err := os.Open(fooPath)
 	if err != nil {
@@ -125,109 +118,87 @@ func TestPut(t *testing.T) {
 		}
 	}(f)
 
-	err = storage.Put(key, f)
+	err = s.storage.Put(key, f)
 	assert.Nil(t, err)
 
-	_, err = s.getObject(key)
-	assert.Nil(t, err)
-}
-
-func TestPutFromFile(t *testing.T) {
-	defer tearDown(t)
-
-	err := storage.PutFromFile(key, fooPath)
-	assert.Nil(t, err)
-
-	_, err = s.getObject(key)
+	_, err = s.store.getObject(key)
 	assert.Nil(t, err)
 }
 
-func TestGet(t *testing.T) {
-	setUp(t)
-	defer tearDown(t)
+func (s *GossTestSuite) TestPutFromFile() {
+	err := s.storage.PutFromFile(key, fooPath)
+	assert.Nil(s.T(), err)
 
-	rc, err := storage.Get(key)
-	assert.Nil(t, err)
+	_, err = s.store.getObject(key)
+	assert.Nil(s.T(), err)
+}
+
+func (s *GossTestSuite) TestGet() {
+	rc, err := s.storage.Get(key)
+	assert.Nil(s.T(), err)
 
 	bs, err := io.ReadAll(rc)
-	assert.Nil(t, err)
-	assert.Equal(t, "foo", string(bs))
+	assert.Nil(s.T(), err)
+	assert.Equal(s.T(), "foo", string(bs))
 }
 
-func TestGetString(t *testing.T) {
-	setUp(t)
-	defer tearDown(t)
+func (s *GossTestSuite) TestGetString() {
+	content, err := s.storage.GetString(key)
 
-	content, err := storage.GetString(key)
-
-	assert.Nil(t, err)
-	assert.Equal(t, "foo", content)
+	assert.Nil(s.T(), err)
+	assert.Equal(s.T(), "foo", content)
 }
 
-func TestGetBytes(t *testing.T) {
-	setUp(t)
-	defer tearDown(t)
+func (s *GossTestSuite) TestGetBytes() {
+	bs, err := s.storage.GetBytes(key)
 
-	bs, err := storage.GetBytes(key)
-
-	assert.Nil(t, err)
-	assert.Equal(t, "foo", string(bs))
+	assert.Nil(s.T(), err)
+	assert.Equal(s.T(), "foo", string(bs))
 }
 
-func TestDelete(t *testing.T) {
-	setUp(t)
-	defer deleteLocal(t)
+func (s *GossTestSuite) TestDelete() {
+	err := s.storage.Delete(key)
+	assert.Nil(s.T(), err)
 
-	err := storage.Delete(key)
-	assert.Nil(t, err)
-
-	_, err = s.getObject(key)
-	assert.NotNil(t, err)
+	_, err = s.store.getObject(key)
+	assert.NotNil(s.T(), err)
 }
 
-func TestSave(t *testing.T) {
-	setUp(t)
-	defer tearDown(t)
-
-	err := storage.GetToFile(key, localFooPath)
-	assert.Nil(t, err)
+func (s *GossTestSuite) TestSave() {
+	err := s.storage.GetToFile(key, localFooPath)
+	assert.Nil(s.T(), err)
 
 	bs, err := os.ReadFile(localFooPath)
-	assert.Nil(t, err)
-	assert.Equal(t, "foo", string(bs))
+	assert.Nil(s.T(), err)
+	assert.Equal(s.T(), "foo", string(bs))
 }
 
-func TestExists(t *testing.T) {
-	setUp(t)
-	defer tearDown(t)
+func (s *GossTestSuite) TestExists() {
+	t := s.T()
 
-	exists, err := storage.Exists(key)
+	exists, err := s.storage.Exists(key)
 
 	assert.Nil(t, err)
 	assert.True(t, exists)
 
-	exists, err = storage.Exists(key + "not_exists")
+	exists, err = s.storage.Exists(key + "not_exists")
 
 	assert.Nil(t, err)
 	assert.False(t, exists)
 }
 
-func TestSize(t *testing.T) {
-	setUp(t)
-	defer tearDown(t)
-
-	size, err := storage.Size(key)
+func (s *GossTestSuite) TestSize() {
+	size, err := s.storage.Size(key)
 
 	var siz int64 = 3
-	assert.Nil(t, err)
-	assert.Equal(t, siz, size)
+	assert.Nil(s.T(), err)
+	assert.Equal(s.T(), siz, size)
 }
 
-func TestFiles(t *testing.T) {
-	setUp(t)
-	defer tearDown(t)
+func (s *GossTestSuite) TestFiles() {
+	t := s.T()
 
-	files, err := storage.Files("test/")
+	files, err := s.storage.Files("test/")
 	assert.Nil(t, err)
 	assert.Len(t, files, 1)
 
@@ -239,20 +210,55 @@ func TestFiles(t *testing.T) {
 	assert.Equal(t, today, files[0].LastModified().Format("2006-01-02"))
 }
 
-func sTestAb(t *testing.T) {
+// prepare test data for testFilesWithMultiPage
+func (s *GossTestSuite) sTestAb() {
 	dir := "test_all/"
 
 	for i := 1; i <= 200; i++ {
-		err := storage.Put(fmt.Sprintf("%s%s.txt", dir, strconv.Itoa(i)), strings.NewReader("foo"))
-		assert.Nil(t, err)
+		err := s.storage.Put(fmt.Sprintf("%s%s.txt", dir, strconv.Itoa(i)), strings.NewReader("foo"))
+		assert.Nil(s.T(), err)
 	}
 }
 
-func TestFilesWithMultiPage(t *testing.T) {
+func (s *GossTestSuite) TestFilesWithMultiPage() {
 	// Testdata was prepared before.
 	dir := "test_all/"
 
-	files, err := storage.Files(dir)
-	assert.Nil(t, err)
-	assert.Len(t, files, 200)
+	files, err := s.storage.Files(dir)
+	assert.Nil(s.T(), err)
+	assert.Len(s.T(), files, 200)
+}
+
+func configs() map[string]Config {
+	type yml struct {
+		Configs map[string]Config `yaml:"configs"`
+	}
+
+	usr, err := user.Current()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	bs, err := os.ReadFile(filepath.Join(usr.HomeDir, ".goss.yml"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	c := &yml{}
+	err = yaml.NewDecoder(strings.NewReader(string(bs))).Decode(c)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return c.Configs
+}
+
+func TestGossTestSuite(t *testing.T) {
+	configs := configs()
+
+	for k, val := range configs {
+		t.Run(k, func(t *testing.T) {
+			suite.Run(t, &GossTestSuite{config: val})
+		})
+	}
 }

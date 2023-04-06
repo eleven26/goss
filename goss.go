@@ -17,7 +17,7 @@ func New(opts ...Option) (*Goss, error) {
 		return nil, err
 	}
 
-	goss.Store, err = newStorage(goss.config)
+	goss.Store, err = newStore(goss.config)
 	if err != nil {
 		return nil, err
 	}

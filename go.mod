@@ -11,6 +11,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.31.1
 	github.com/aws/smithy-go v1.13.5
 	github.com/stretchr/testify v1.8.0
+	gopkg.in/yaml.v2 v2.2.8
 )
 
 require (
