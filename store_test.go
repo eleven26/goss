@@ -84,6 +84,7 @@ func (s *GossTestSuite) SetupTest() {
 		if err != nil {
 			s.T().Fatal(err)
 		}
+		s.prepareTestData()
 	}
 
 	// 临时文件创建
@@ -221,7 +222,7 @@ func (s *GossTestSuite) TestFiles() {
 }
 
 // prepare test data for testFilesWithMultiPage
-func (s *GossTestSuite) sTestAb() {
+func (s *GossTestSuite) prepareTestData() {
 	dir := "test_all/"
 
 	for i := 1; i <= 200; i++ {
