@@ -7,6 +7,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
+var maxKeys int32 = 1000
+
 type chunks struct {
 	bucket string
 	prefix string
@@ -28,6 +30,7 @@ func (c *chunks) Chunk() (*listObjectResult, error) {
 		Bucket:            aws.String(c.bucket),
 		ContinuationToken: c.token,
 		Prefix:            aws.String(c.prefix),
+		MaxKeys:           maxKeys,
 	}
 
 	output, err := c.s3.ListObjectsV2(context.TODO(), input)
