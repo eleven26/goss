@@ -14,7 +14,7 @@
 ## 🚀 安装
 
 ```shell
-go get -u github.com/eleven26/goss/v2
+go get -u github.com/eleven26/goss/v3
 ```
 
 

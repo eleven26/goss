@@ -1,8 +1,6 @@
-module github.com/eleven26/goss/v2
+module github.com/eleven26/goss/v3
 
 go 1.18
-
-retract v2.0.0
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.17.7
