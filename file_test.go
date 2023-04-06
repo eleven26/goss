@@ -1,11 +1,12 @@
 package goss
 
 import (
+	"testing"
+	"time"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/stretchr/testify/assert"
-	"testing"
-	"time"
 )
 
 func TestFile(t *testing.T) {
@@ -23,5 +24,5 @@ func TestFile(t *testing.T) {
 	assert.Equal(t, "test", f.Type())
 	assert.Equal(t, "test", f.ETag())
 	assert.Equal(t, int64(1), f.Size())
-	assert.Equal(t, now, f.LastModified())
+	assert.Equal(t, *now, f.LastModified())
 }
