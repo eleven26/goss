@@ -1,9 +1,9 @@
 # goss
 
-✨ `goss` 是一个简洁的云存储 golang 库，支持**阿里云**、**腾讯云**、**七牛云**、**华为云**、**aws s3**、**minio**。
+✨ `goss` 是一个简洁的云存储 golang 库，兼容 amazon s3 协议，支持但不限于**阿里云**、**腾讯云**、**七牛云**、**华为云**、**aws s3**、**minio**。
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/eleven26/go-filesystem.svg)](https://pkg.go.dev/github.com/eleven26/goss)
-[![Go Report Card](https://goreportcard.com/badge/github.com/eleven26/go-filesystem)](https://goreportcard.com/report/github.com/eleven26/goss)
+[![Go Reference](https://pkg.go.dev/badge/github.com/eleven26/goss.svg)](https://pkg.go.dev/github.com/eleven26/goss)
+[![Go Report Card](https://goreportcard.com/badge/github.com/eleven26/goss)](https://goreportcard.com/report/github.com/eleven26/goss)
 [![Go](https://github.com/eleven26/goss/actions/workflows/go.yml/badge.svg)](https://github.com/eleven26/goss/actions/workflows/go.yml)
 [![codecov](https://codecov.io/gh/eleven26/goss/branch/main/graph/badge.svg?token=UU4lLD2n4k)](https://codecov.io/gh/eleven26/goss)
 [![GitHub license](https://img.shields.io/github/license/eleven26/goss)](https://github.com/eleven26/goss/blob/main/LICENSE)
@@ -22,75 +22,31 @@ go get -u github.com/eleven26/goss/v2
 
 所有支持的配置项：
 
-```yaml
-# 云存储类型
-# 可选值为： aliyun、tencent、qiniu、huawei、s3、minio
-driver: aliyun
+```go
+type Config struct {
+	Endpoint          string `yaml:"endpoint"`
+	AccessKey         string `yaml:"access_key"`
+	SecretKey         string `yaml:"secret_key"`
+	Region            string `yaml:"region"`
+	Bucket            string `yaml:"bucket"`
 
-# 阿里云 oss 配置
-aliyun:
-  # oss 的链接，不同区域不同
-  endpoint:
-  # bucket
-  bucket:
-  access_key_id:
-  access_key_secret:
-
-# 腾讯云 cos 配置 
-tencent:
-  # 腾讯云 bucket 对应的的 url
-  url:
-  secret_id:
-  secret_key:
-
-# 七牛云 kodo 配置
-qiniu:
-  # bucket 名称
-  bucket:
-  access_key:
-  secret_key:
-  # bucket 外链域名
-  domain:
-  # 是否是私有空间
-  private:
-
-# 华为云 obs 配置
-huawei:
-  endpoint:
-  location:
-  bucket:
-  access_key:
-  secret_key:
-
-# aws s3 配置
-s3:
-  endpoint:
-  region:
-  bucket:
-  access_key:
-  secret_key:
-
-# minio 配置
-minio:
-  endpoint:
-  bucket:
-  access_key:
-  secret_key:
-  use_ssl: false
+    // 如果是使用 minio，并且没有使用 https，需要设置为 true
+	UseSsl            *bool  `yaml:"use_ssl"`
+	// 如果是使用 minio，需要设置为 true
+	HostnameImmutable *bool  `yaml:"hostname_immutable"`
+}
 ```
 
-样例配置：
+配置的方式，在创建实例的时候通过 `WithConfig` 来传递：
 
-> 比如，如果只是使用阿里云 oss，则只需添加以下配置项就可以了：
-
-```yaml
-driver: aliyun
-
-aliyun:
-  endpoint: oss-cn-shenzhen.aliyuncs.com
-  bucket: images
-  access_key_id: LT2I316210b3JlXj
-  access_key_secret: 4IZq10e233Ya1ZS18JDG0ZfvBBnYva
+```go
+goss, err := goss.New(goss.WithConfig(&Config{
+    Endpoint: "",
+	AccessKey: "",
+	SecretKey: "",
+    Region: "",
+    Bucket: "",
+}))
 ```
 
 
@@ -105,26 +61,20 @@ import "github.com/eleven26/goss/v2/goss"
 2. 使用之前需要创建实例：
 
 ```go
-// path 是配置文件的路径
-path := "./goss.yml"
-goss, err := goss.New(path)
-// storage 是云存储对象
-storage := goss.Storage
-```
-
-另外一种初始化的方式，传入 `viper` 对象：
-
-```go
-goss, err := goss.NewWithViper(viper)
-// storage 是云存储对象
-storage := goss.Storage
+goss, err := goss.New(goss.WithConfig(&Config{
+    Endpoint: "",
+    AccessKey: "",
+    SecretKey: "",
+    Region: "",
+    Bucket: "",
+}))
 ```
 
 3. 使用
 
 ```go
-// storage.GetString 会获取路径指定的文件，返回字符串
-fmt.Println(storage.GetString("test/foo.txt"))
+// goss.GetString 会获取路径指定的文件，返回字符串
+fmt.Println(goss.GetString("test/foo.txt"))
 ```
 
 
@@ -150,7 +100,7 @@ fmt.Println(storage.GetString("test/foo.txt"))
 ```go
 data := []byte("this is some data stored as a byte slice in Go Lang!")
 r := bytes.NewReader(data)
-err := storage.Put("test/test.txt", r)
+err := goss.Put("test/test.txt", r)
 ```
 
 ### PutFromFile
@@ -158,7 +108,7 @@ err := storage.Put("test/test.txt", r)
 上传文件到云存储。第一个参数是 key，第二个参数是本地文件路径。
 
 ```go
-err := storage.PutFromFile("test/test.txt", "/path/to/test.txt")
+err := goss.PutFromFile("test/test.txt", "/path/to/test.txt")
 ```
 
 ### Get
@@ -167,7 +117,7 @@ err := storage.PutFromFile("test/test.txt", "/path/to/test.txt")
 
 ```go
 // rc 是 `io.ReadCloser`
-rc, err := storage.Get("test/test.txt")
+rc, err := goss.Get("test/test.txt")
 defer rc.Close()
 
 bs, err := io.ReadAll(rc)
@@ -179,7 +129,7 @@ fmt.Println(string(bs))
 从云存储获取文件。参数是 key。返回值是 `string` 和 `error`
 
 ```go
-content, err := storage.GetString("test/test.txt")
+content, err := goss.GetString("test/test.txt")
 fmt.Println(content)
 ```
 
@@ -188,7 +138,7 @@ fmt.Println(content)
 从云存储获取文件。参数是 key。返回值是 `[]byte` 和 `error`
 
 ```go
-bs, err := storage.GetBytes("test/test.txt")
+bs, err := goss.GetBytes("test/test.txt")
 fmt.Println(string(bs))
 ```
 
@@ -198,7 +148,7 @@ fmt.Println(string(bs))
 
 ```go
 // 第一个参数是云端路径，第二个参数是本地路径
-err := storage.GetToFile("test/test.txt", "/path/to/local")
+err := goss.GetToFile("test/test.txt", "/path/to/local")
 ```
 
 ### Delete
@@ -206,7 +156,7 @@ err := storage.GetToFile("test/test.txt", "/path/to/local")
 删除云存储文件。
 
 ```go
-err := storage.Delete("test/test.txt")
+err := goss.Delete("test/test.txt")
 ```
 
 ### Exists
@@ -214,17 +164,17 @@ err := storage.Delete("test/test.txt")
 判断云存储文件是否存在。
 
 ```go
-exists, err := storage.Exists("test/test.txt")
+exists, err := goss.Exists("test/test.txt")
 ```
 
 ### Files
 
 根据前缀获取文件列表。
 
-> minio 最多返回 1000 个，其他的有多少返回多少。
+> 目前最多返回 1000 个。
 
 ```go
-exists, err := storage.Files("test/")
+exists, err := goss.Files("test/")
 ```
 
 ### Size
@@ -232,7 +182,7 @@ exists, err := storage.Files("test/")
 获取云存储文件大小。
 
 ```go
-size, err := storage.Size("test/test.txt")
+size, err := goss.Size("test/test.txt")
 ```
 
 ## 参考文档
@@ -243,3 +193,11 @@ size, err := storage.Size("test/test.txt")
 4. [华为云对象存储](https://support.huaweicloud.com/obs/index.html)
 5. [aws s3](https://docs.aws.amazon.com/sdk-for-go/api/service/s3/)
 6. [minio](https://github.com/minio/minio)
+
+## 各云厂商对 s3 的支持
+
+1. [阿里云: OSS与Amazon S3的兼容性](https://help.aliyun.com/document_detail/389025.html)
+2. [腾讯云: 使用 AWS S3 SDK 访问 COS](https://cloud.tencent.com/document/product/436/37421)
+3. [七牛云: AWS S3 兼容](https://developer.qiniu.com/kodo/4086/aws-s3-compatible)
+4. 华为云：支持 s3，但是官网文档找不到相关关于 s3 兼容的相关描述
+5. [minio: AWS S3 Compatibility](https://min.io/product/s3-compatibility)

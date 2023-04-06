@@ -7,44 +7,44 @@ on:
     branches: [ "main" ]
 
 jobs:
-
-  unit-test:
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: latest
+          args: --timeout 5m
+      - name: Check Go module tidiness
+        shell: bash
+        run: |
+          go mod tidy
+          STATUS=$(git status --porcelain go.mod go.sum)
+          if [ ! -z "$STATUS" ]; then
+            echo "Running go mod tidy modified go.mod and/or go.sum"
+            exit 1
+          fi
 
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
           go-version: 1.18
-
-      - name: Test
-        run: go test -race -coverprofile=coverage.xml -covermode=atomic -v ./core/*
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          files: ./coverage.xml
-
-  integration-test:
-    runs-on: ubuntu-latest
-    needs: unit-test
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Set up Go
-        uses: actions/setup-go@v3
-        with:
-          go-version: 1.18
-
       - name: Start UP MinIO
         uses: infleet/minio-action@v0.0.1
         with:
-          port: "9000"
-          version: "latest"
+          port: 9000
+          version: latest
           username: ${{ secrets.MINIO_SERVER_ACCESS_KEY }}
           password: ${{ secrets.MINIO_SERVER_SECRET_KEY }}
-
       - name: Create .goss.yml
         env:
           GOSS_YML: ${{ secrets.GOSS_YML }}
@@ -52,7 +52,10 @@ jobs:
           cat <<EOF > ~/.goss.yml
           $GOSS_YML
           EOF
-
-      - name: Integration Test
+      - name: Test
         run: |
-          make integration
+          go test -v . -cover -coverprofile=coverage.out -covermode=atomic -tags=integration
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage.out
