@@ -69,12 +69,22 @@ func (s *GossTestSuite) SetupTest() {
 	// 临时文件创建
 	createTempFiles()
 
+	// 创建 goss 对象
 	goss, err := New(WithConfig(&s.config))
 	if err != nil {
 		s.T().Fatal(err)
 	}
 	s.storage = goss.Store
 	s.store = s.storage.(*store)
+
+	// github 集成测试 minio 的 bucket 创建
+	_, err = s.store.s3.HeadBucket(context.TODO(), &s3.HeadBucketInput{Bucket: aws.String(s.config.Bucket)})
+	if err != nil && strings.Contains(err.Error(), "404") {
+		_, err = s.store.s3.CreateBucket(context.TODO(), &s3.CreateBucketInput{Bucket: aws.String(s.config.Bucket)})
+		if err != nil {
+			s.T().Fatal(err)
+		}
+	}
 
 	// 临时文件创建
 	err = s.storage.PutFromFile(key, fooPath)
