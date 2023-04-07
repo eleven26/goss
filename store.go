@@ -14,7 +14,10 @@ import (
 	"github.com/aws/smithy-go"
 )
 
-// Store defines a unified interface for reading and writing cloud storage objects.
+// max keys for list objects
+var maxKeys int32 = 1000
+
+// Store defines interface for cloud storage.
 type Store interface {
 	// Put saves the content read from r to the key of oss.
 	Put(key string, r io.Reader) error
@@ -79,10 +82,6 @@ var _ Store = &store{}
 type store struct {
 	s3     *s3.Client
 	Bucket string
-}
-
-func (s *store) Files(dir string) ([]File, error) {
-	return newFileIterator(newChunks(s.Bucket, dir, s.s3)).All()
 }
 
 func (s *store) Put(key string, r io.Reader) error {
@@ -222,4 +221,42 @@ func (s *store) GetToFile(key string, localPath string) (err error) {
 	_, err = io.Copy(f, rc)
 
 	return err
+}
+
+// Files list all files in the given prefix.
+func (s *store) Files(dir string) ([]File, error) {
+	var continuationToken *string
+	var count int32
+	var files []File
+
+	for {
+		input := &s3.ListObjectsV2Input{
+			Bucket:            aws.String(s.Bucket),
+			ContinuationToken: continuationToken,
+			Prefix:            aws.String(dir),
+			MaxKeys:           maxKeys,
+		}
+
+		output, err := s.s3.ListObjectsV2(context.TODO(), input)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, item := range output.Contents {
+			if strings.HasSuffix(*item.Key, "/") {
+				continue
+			}
+
+			files = append(files, &file{item})
+			count++
+		}
+
+		if !output.IsTruncated {
+			break
+		}
+
+		continuationToken = output.NextContinuationToken
+	}
+
+	return files, nil
 }
