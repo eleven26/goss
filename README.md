@@ -24,16 +24,16 @@ go get -u github.com/eleven26/goss/v3
 
 ```go
 type Config struct {
-	Endpoint          string `yaml:"endpoint"`
-	AccessKey         string `yaml:"access_key"`
-	SecretKey         string `yaml:"secret_key"`
-	Region            string `yaml:"region"`
-	Bucket            string `yaml:"bucket"`
+    Endpoint          string `yaml:"endpoint"`
+    AccessKey         string `yaml:"access_key"`
+    SecretKey         string `yaml:"secret_key"`
+    Region            string `yaml:"region"`
+    Bucket            string `yaml:"bucket"`
 
     // 如果是使用 minio，并且没有使用 https，需要设置为 true
-	UseSsl            *bool  `yaml:"use_ssl"`
-	// 如果是使用 minio，需要设置为 true
-	HostnameImmutable *bool  `yaml:"hostname_immutable"`
+    UseSsl            *bool  `yaml:"use_ssl"`
+    // 如果是使用 minio，需要设置为 true
+    HostnameImmutable *bool  `yaml:"hostname_immutable"`
 }
 ```
 
@@ -42,8 +42,8 @@ type Config struct {
 ```go
 goss, err := goss.New(goss.WithConfig(&Config{
     Endpoint: "",
-	AccessKey: "",
-	SecretKey: "",
+    AccessKey: "",
+    SecretKey: "",
     Region: "",
     Bucket: "",
 }))
