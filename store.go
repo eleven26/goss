@@ -20,7 +20,7 @@ var maxKeys int32 = 1000
 // Store defines interface for cloud storage.
 type Store interface {
 	// Put saves the content read from r to the key of oss.
-	Put(key string, r io.Reader) error
+	Put(key string, r io.Reader, opts ...PutOption) error
 
 	// PutFromFile saves the file pointed to by the `localPath` to the oss key.
 	PutFromFile(key string, localPath string) error
@@ -84,21 +84,22 @@ type store struct {
 	Bucket string
 }
 
-func (s *store) Put(key string, r io.Reader) error {
+func (s *store) Put(key string, r io.Reader, opts ...PutOption) error {
 	bs, err := io.ReadAll(r)
 	if err != nil {
 		return err
 	}
 
-	return s.putFile(key, bytes.NewReader(bs))
+	return s.putFile(key, bytes.NewReader(bs), opts...)
 }
 
-func (s *store) putFile(key string, f io.ReadSeeker) error {
-	input := &s3.PutObjectInput{
+func (s *store) putFile(key string, f io.ReadSeeker, opts ...PutOption) error {
+	input := withPutOptions(&s3.PutObjectInput{
 		Body:   f,
 		Bucket: aws.String(s.Bucket),
 		Key:    aws.String(key),
-	}
+	}, opts...)
+
 	_, err := s.s3.PutObject(context.TODO(), input)
 
 	return err

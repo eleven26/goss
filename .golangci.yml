@@ -1,0 +1,8 @@
+run:
+  deadline: 5m
+
+issues:
+
+  exclude-rules:
+    - path: put_option\.go
+      text: PutOption
