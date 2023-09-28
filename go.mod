@@ -1,4 +1,4 @@
-module github.com/eleven26/goss/v3
+module github.com/eleven26/goss/v4
 
 go 1.18
 
