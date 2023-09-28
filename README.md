@@ -203,3 +203,11 @@ size, err := goss.Size(context.TODO(), "test/test.txt")
 ## 注意事项
 
 1. 七牛云的 `endpoint` 和 `region` 配置请参考这个文档：[AWS S3 兼容 - 服务域名](https://developer.qiniu.com/kodo/4088/s3-access-domainname)
+
+## Changelog
+
+### [4.0.0] - 2023-09-28
+
+#### Changed
+
+- 所有方法添加 `context.Context` 作为第一个参数。
