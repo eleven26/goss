@@ -40,7 +40,7 @@ type Config struct {
 配置的方式，在创建实例的时候通过 `WithConfig` 来传递：
 
 ```go
-goss, err := goss.New(goss.WithConfig(&Config{
+goss, err := goss.New(goss.WithConfig(&goss.Config{
     Endpoint: "",
     AccessKey: "",
     SecretKey: "",
