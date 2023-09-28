@@ -55,7 +55,7 @@ goss, err := goss.New(goss.WithConfig(&Config{
 1. 你可以通过下面的代码来导入 `goss`:
 
 ```go
-import "github.com/eleven26/goss/v3"
+import "github.com/eleven26/goss/v4"
 ```
 
 2. 使用之前需要创建实例：
