@@ -2,8 +2,8 @@
 
 ✨ `goss` 是一个简洁的云存储 golang 库，兼容 amazon s3 协议，支持但不限于**阿里云**、**腾讯云**、**七牛云**、**华为云**、**aws s3**、**minio**。
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/eleven26/goss/v3.svg)](https://pkg.go.dev/github.com/eleven26/goss/v3)
-[![Go Report Card](https://goreportcard.com/badge/github.com/eleven26/goss/v3)](https://goreportcard.com/report/github.com/eleven26/goss/v3)
+[![Go Reference](https://pkg.go.dev/badge/github.com/eleven26/goss/v4.svg)](https://pkg.go.dev/github.com/eleven26/goss/v4)
+[![Go Report Card](https://goreportcard.com/badge/github.com/eleven26/goss/v4)](https://goreportcard.com/report/github.com/eleven26/goss/v4)
 [![Go](https://github.com/eleven26/goss/actions/workflows/go.yml/badge.svg)](https://github.com/eleven26/goss/actions/workflows/go.yml)
 [![codecov](https://codecov.io/gh/eleven26/goss/branch/main/graph/badge.svg?token=UU4lLD2n4k)](https://codecov.io/gh/eleven26/goss)
 [![GitHub license](https://img.shields.io/github/license/eleven26/goss)](https://github.com/eleven26/goss/blob/main/LICENSE)
@@ -95,7 +95,7 @@ fmt.Println(goss.GetString(context.TODO(), "test/foo.txt"))
 
 ### Put
 
-上传文件到云存储。第一个参数是 key，第二个参数是 `io.Reader`。
+上传文件到云存储。第一个参数是 `key`，第二个参数是 `io.Reader`。
 
 ```go
 data := []byte("this is some data stored as a byte slice in Go Lang!")
@@ -105,7 +105,7 @@ err := goss.Put(context.TODO(), "test/test.txt", r)
 
 ### PutFromFile
 
-上传文件到云存储。第一个参数是 key，第二个参数是本地文件路径。
+上传文件到云存储。第一个参数是 `key`，第二个参数是本地文件路径。
 
 ```go
 err := goss.PutFromFile(context.TODO(), "test/test.txt", "/path/to/test.txt")
@@ -113,7 +113,7 @@ err := goss.PutFromFile(context.TODO(), "test/test.txt", "/path/to/test.txt")
 
 ### Get
 
-从云存储获取文件。参数是 key。返回值是 `io.ReadCloser` 和 `error`。
+从云存储获取文件。参数是 `key`。返回值是 `io.ReadCloser` 和 `error`。
 
 ```go
 // rc 是 `io.ReadCloser`
@@ -126,7 +126,7 @@ fmt.Println(string(bs))
 
 ### GetString
 
-从云存储获取文件。参数是 key。返回值是 `string` 和 `error`
+从云存储获取文件。参数是 `key`。返回值是 `string` 和 `error`
 
 ```go
 content, err := goss.GetString(context.TODO(), "test/test.txt")
@@ -135,7 +135,7 @@ fmt.Println(content)
 
 ### GetBytes
 
-从云存储获取文件。参数是 key。返回值是 `[]byte` 和 `error`
+从云存储获取文件。参数是 `key`。返回值是 `[]byte` 和 `error`
 
 ```go
 bs, err := goss.GetBytes(context.TODO(), "test/test.txt")
@@ -144,7 +144,7 @@ fmt.Println(string(bs))
 
 ### GetToFile
 
-下载云存储文件到本地。第一个参数是 key，第二个参数是本地路径。
+下载云存储文件到本地。第一个参数是 `key`，第二个参数是本地路径。
 
 ```go
 // 第一个参数是云端路径，第二个参数是本地路径
