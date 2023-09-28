@@ -108,7 +108,7 @@ err := goss.Put("test/test.txt", r)
 上传文件到云存储。第一个参数是 key，第二个参数是本地文件路径。
 
 ```go
-err := goss.PutFromFile("test/test.txt", "/path/to/test.txt")
+err := goss.PutFromFile(context.TODO(), "test/test.txt", "/path/to/test.txt")
 ```
 
 ### Get
@@ -117,7 +117,7 @@ err := goss.PutFromFile("test/test.txt", "/path/to/test.txt")
 
 ```go
 // rc 是 `io.ReadCloser`
-rc, err := goss.Get("test/test.txt")
+rc, err := goss.Get(context.TODO(), "test/test.txt")
 defer rc.Close()
 
 bs, err := io.ReadAll(rc)
@@ -129,7 +129,7 @@ fmt.Println(string(bs))
 从云存储获取文件。参数是 key。返回值是 `string` 和 `error`
 
 ```go
-content, err := goss.GetString("test/test.txt")
+content, err := goss.GetString(context.TODO(), "test/test.txt")
 fmt.Println(content)
 ```
 
@@ -138,7 +138,7 @@ fmt.Println(content)
 从云存储获取文件。参数是 key。返回值是 `[]byte` 和 `error`
 
 ```go
-bs, err := goss.GetBytes("test/test.txt")
+bs, err := goss.GetBytes(context.TODO(), "test/test.txt")
 fmt.Println(string(bs))
 ```
 
@@ -148,7 +148,7 @@ fmt.Println(string(bs))
 
 ```go
 // 第一个参数是云端路径，第二个参数是本地路径
-err := goss.GetToFile("test/test.txt", "/path/to/local")
+err := goss.GetToFile(context.TODO(), "test/test.txt", "/path/to/local")
 ```
 
 ### Delete
@@ -156,7 +156,7 @@ err := goss.GetToFile("test/test.txt", "/path/to/local")
 删除云存储文件。
 
 ```go
-err := goss.Delete("test/test.txt")
+err := goss.Delete(context.TODO(), "test/test.txt")
 ```
 
 ### Exists
@@ -164,7 +164,7 @@ err := goss.Delete("test/test.txt")
 判断云存储文件是否存在。
 
 ```go
-exists, err := goss.Exists("test/test.txt")
+exists, err := goss.Exists(context.TODO(), "test/test.txt")
 ```
 
 ### Files
@@ -172,7 +172,7 @@ exists, err := goss.Exists("test/test.txt")
 根据前缀获取文件列表。
 
 ```go
-exists, err := goss.Files("test/")
+exists, err := goss.Files(context.TODO(), "test/")
 ```
 
 ### Size
@@ -180,7 +180,7 @@ exists, err := goss.Files("test/")
 获取云存储文件大小。
 
 ```go
-size, err := goss.Size("test/test.txt")
+size, err := goss.Size(context.TODO(), "test/test.txt")
 ```
 
 ## 参考文档

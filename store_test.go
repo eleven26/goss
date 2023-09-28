@@ -70,7 +70,7 @@ func (s *GossTestSuite) SetupTest() {
 	createTempFiles()
 
 	// 远程文件创建
-	err := s.storage.PutFromFile(key, fooPath)
+	err := s.storage.PutFromFile(context.TODO(), key, fooPath)
 	if err != nil {
 		s.T().Fatal(err)
 	}
@@ -134,23 +134,23 @@ func (s *GossTestSuite) TestPut() {
 		}
 	}(f)
 
-	err = s.storage.Put(key, f)
+	err = s.storage.Put(context.TODO(), key, f)
 	assert.Nil(t, err)
 
-	_, err = s.store.getObject(key)
+	_, err = s.store.getObject(context.TODO(), key)
 	assert.Nil(t, err)
 }
 
 func (s *GossTestSuite) TestPutFromFile() {
-	err := s.storage.PutFromFile(key, fooPath)
+	err := s.storage.PutFromFile(context.TODO(), key, fooPath)
 	assert.Nil(s.T(), err)
 
-	_, err = s.store.getObject(key)
+	_, err = s.store.getObject(context.TODO(), key)
 	assert.Nil(s.T(), err)
 }
 
 func (s *GossTestSuite) TestGet() {
-	rc, err := s.storage.Get(key)
+	rc, err := s.storage.Get(context.TODO(), key)
 	assert.Nil(s.T(), err)
 
 	bs, err := io.ReadAll(rc)
@@ -159,29 +159,29 @@ func (s *GossTestSuite) TestGet() {
 }
 
 func (s *GossTestSuite) TestGetString() {
-	content, err := s.storage.GetString(key)
+	content, err := s.storage.GetString(context.TODO(), key)
 
 	assert.Nil(s.T(), err)
 	assert.Equal(s.T(), "foo", content)
 }
 
 func (s *GossTestSuite) TestGetBytes() {
-	bs, err := s.storage.GetBytes(key)
+	bs, err := s.storage.GetBytes(context.TODO(), key)
 
 	assert.Nil(s.T(), err)
 	assert.Equal(s.T(), "foo", string(bs))
 }
 
 func (s *GossTestSuite) TestDelete() {
-	err := s.storage.Delete(key)
+	err := s.storage.Delete(context.TODO(), key)
 	assert.Nil(s.T(), err)
 
-	_, err = s.store.getObject(key)
+	_, err = s.store.getObject(context.TODO(), key)
 	assert.NotNil(s.T(), err)
 }
 
 func (s *GossTestSuite) TestSave() {
-	err := s.storage.GetToFile(key, localFooPath)
+	err := s.storage.GetToFile(context.TODO(), key, localFooPath)
 	assert.Nil(s.T(), err)
 
 	bs, err := os.ReadFile(localFooPath)
@@ -192,19 +192,19 @@ func (s *GossTestSuite) TestSave() {
 func (s *GossTestSuite) TestExists() {
 	t := s.T()
 
-	exists, err := s.storage.Exists(key)
+	exists, err := s.storage.Exists(context.TODO(), key)
 
 	assert.Nil(t, err)
 	assert.True(t, exists)
 
-	exists, err = s.storage.Exists(key + "not_exists")
+	exists, err = s.storage.Exists(context.TODO(), key+"not_exists")
 
 	assert.Nil(t, err)
 	assert.False(t, exists)
 }
 
 func (s *GossTestSuite) TestSize() {
-	size, err := s.storage.Size(key)
+	size, err := s.storage.Size(context.TODO(), key)
 
 	var siz int64 = 3
 	assert.Nil(s.T(), err)
@@ -214,7 +214,7 @@ func (s *GossTestSuite) TestSize() {
 func (s *GossTestSuite) TestFiles() {
 	t := s.T()
 
-	files, err := s.storage.Files("test/")
+	files, err := s.storage.Files(context.TODO(), "test/")
 	assert.Nil(t, err)
 	assert.Len(t, files, 1)
 
@@ -231,7 +231,7 @@ func (s *GossTestSuite) prepareTestData() {
 	dir := "test_all/"
 
 	for i := 1; i <= 200; i++ {
-		err := s.storage.Put(fmt.Sprintf("%s%s.txt", dir, strconv.Itoa(i)), strings.NewReader("foo"))
+		err := s.storage.Put(context.TODO(), fmt.Sprintf("%s%s.txt", dir, strconv.Itoa(i)), strings.NewReader("foo"))
 		assert.Nil(s.T(), err)
 	}
 }
@@ -240,7 +240,7 @@ func (s *GossTestSuite) TestFilesWithMultiPage() {
 	// Testdata was prepared before.
 	dir := "test_all/"
 
-	files, err := s.storage.Files(dir)
+	files, err := s.storage.Files(context.TODO(), dir)
 	assert.Nil(s.T(), err)
 	assert.Len(s.T(), files, 200)
 }

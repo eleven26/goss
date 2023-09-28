@@ -20,34 +20,34 @@ var maxKeys int32 = 1000
 // Store defines interface for cloud storage.
 type Store interface {
 	// Put saves the content read from r to the key of oss.
-	Put(key string, r io.Reader) error
+	Put(ctx context.Context, key string, r io.Reader) error
 
 	// PutFromFile saves the file pointed to by the `localPath` to the oss key.
-	PutFromFile(key string, localPath string) error
+	PutFromFile(ctx context.Context, key string, localPath string) error
 
 	// Get gets the file pointed to by key.
-	Get(key string) (io.ReadCloser, error)
+	Get(ctx context.Context, key string) (io.ReadCloser, error)
 
 	// GetString gets the file pointed to by key and returns a string.
-	GetString(key string) (string, error)
+	GetString(ctx context.Context, key string) (string, error)
 
 	// GetBytes gets the file pointed to by key and returns a byte array.
-	GetBytes(key string) ([]byte, error)
+	GetBytes(ctx context.Context, key string) ([]byte, error)
 
 	// GetToFile saves the file pointed to by key to the localPath.
-	GetToFile(key string, localPath string) error
+	GetToFile(ctx context.Context, key string, localPath string) error
 
 	// Delete the file pointed to by key.
-	Delete(key string) error
+	Delete(ctx context.Context, key string) error
 
 	// Exists determines whether the file exists.
-	Exists(key string) (bool, error)
+	Exists(ctx context.Context, key string) (bool, error)
 
 	// Files list all files in the specified directory.
-	Files(dir string) ([]File, error)
+	Files(ctx context.Context, dir string) ([]File, error)
 
 	// Size fet the file size.
-	Size(key string) (int64, error)
+	Size(ctx context.Context, key string) (int64, error)
 }
 
 func newStore(conf *Config) (Store, error) {
@@ -84,46 +84,46 @@ type store struct {
 	Bucket string
 }
 
-func (s *store) Put(key string, r io.Reader) error {
+func (s *store) Put(ctx context.Context, key string, r io.Reader) error {
 	bs, err := io.ReadAll(r)
 	if err != nil {
 		return err
 	}
 
-	return s.putFile(key, bytes.NewReader(bs))
+	return s.putFile(ctx, key, bytes.NewReader(bs))
 }
 
-func (s *store) putFile(key string, f io.ReadSeeker) error {
+func (s *store) putFile(ctx context.Context, key string, f io.ReadSeeker) error {
 	input := &s3.PutObjectInput{
 		Body:   f,
 		Bucket: aws.String(s.Bucket),
 		Key:    aws.String(key),
 	}
-	_, err := s.s3.PutObject(context.TODO(), input)
+	_, err := s.s3.PutObject(ctx, input)
 
 	return err
 }
 
-func (s *store) PutFromFile(key string, localPath string) error {
+func (s *store) PutFromFile(ctx context.Context, key string, localPath string) error {
 	f, err := os.Open(localPath)
 	if err != nil {
 		return err
 	}
 
-	return s.putFile(key, f)
+	return s.putFile(ctx, key, f)
 }
 
-func (s *store) getObject(key string) (*s3.GetObjectOutput, error) {
+func (s *store) getObject(ctx context.Context, key string) (*s3.GetObjectOutput, error) {
 	input := &s3.GetObjectInput{
 		Bucket: aws.String(s.Bucket),
 		Key:    aws.String(key),
 	}
 
-	return s.s3.GetObject(context.TODO(), input)
+	return s.s3.GetObject(ctx, input)
 }
 
-func (s *store) Get(key string) (io.ReadCloser, error) {
-	output, err := s.getObject(key)
+func (s *store) Get(ctx context.Context, key string) (io.ReadCloser, error) {
+	output, err := s.getObject(ctx, key)
 	if err != nil {
 		return nil, err
 	}
@@ -131,17 +131,17 @@ func (s *store) Get(key string) (io.ReadCloser, error) {
 	return output.Body, nil
 }
 
-func (s *store) head(key string) (*s3.HeadObjectOutput, error) {
+func (s *store) head(ctx context.Context, key string) (*s3.HeadObjectOutput, error) {
 	input := &s3.HeadObjectInput{
 		Bucket: aws.String(s.Bucket),
 		Key:    aws.String(key),
 	}
 
-	return s.s3.HeadObject(context.TODO(), input)
+	return s.s3.HeadObject(ctx, input)
 }
 
-func (s *store) Size(key string) (int64, error) {
-	output, err := s.head(key)
+func (s *store) Size(ctx context.Context, key string) (int64, error) {
+	output, err := s.head(ctx, key)
 	if err != nil {
 		return 0, err
 	}
@@ -149,8 +149,8 @@ func (s *store) Size(key string) (int64, error) {
 	return output.ContentLength, nil
 }
 
-func (s *store) Exists(key string) (bool, error) {
-	_, err := s.head(key)
+func (s *store) Exists(ctx context.Context, key string) (bool, error) {
+	_, err := s.head(ctx, key)
 	if err != nil {
 		if e, ok := err.(*smithy.OperationError); ok {
 			if strings.Contains(e.Err.Error(), "404") {
@@ -164,13 +164,13 @@ func (s *store) Exists(key string) (bool, error) {
 	return true, nil
 }
 
-func (s *store) Delete(key string) error {
+func (s *store) Delete(ctx context.Context, key string) error {
 	input := &s3.DeleteObjectInput{
 		Bucket: aws.String(s.Bucket),
 		Key:    aws.String(key),
 	}
 
-	_, err := s.s3.DeleteObject(context.TODO(), input)
+	_, err := s.s3.DeleteObject(ctx, input)
 	if err != nil {
 		return err
 	}
@@ -179,8 +179,8 @@ func (s *store) Delete(key string) error {
 }
 
 // GetBytes gets the file pointed to by key and returns a byte array.
-func (s *store) GetBytes(key string) (bytes []byte, err error) {
-	rc, err := s.Get(key)
+func (s *store) GetBytes(ctx context.Context, key string) (bytes []byte, err error) {
+	rc, err := s.Get(ctx, key)
 	if err != nil {
 		return
 	}
@@ -193,8 +193,8 @@ func (s *store) GetBytes(key string) (bytes []byte, err error) {
 }
 
 // GetString gets the file pointed to by key and returns a string.
-func (s *store) GetString(key string) (string, error) {
-	bs, err := s.GetBytes(key)
+func (s *store) GetString(ctx context.Context, key string) (string, error) {
+	bs, err := s.GetBytes(ctx, key)
 	if err != nil {
 		return "", err
 	}
@@ -203,8 +203,8 @@ func (s *store) GetString(key string) (string, error) {
 }
 
 // GetToFile saves the file pointed to by key to the localPath.
-func (s *store) GetToFile(key string, localPath string) (err error) {
-	rc, err := s.Get(key)
+func (s *store) GetToFile(ctx context.Context, key string, localPath string) (err error) {
+	rc, err := s.Get(ctx, key)
 	if err != nil {
 		return err
 	}
@@ -224,7 +224,7 @@ func (s *store) GetToFile(key string, localPath string) (err error) {
 }
 
 // Files list all files in the given prefix.
-func (s *store) Files(dir string) ([]File, error) {
+func (s *store) Files(ctx context.Context, dir string) ([]File, error) {
 	var continuationToken *string
 	var count int32
 	var files []File
@@ -237,7 +237,7 @@ func (s *store) Files(dir string) ([]File, error) {
 			MaxKeys:           maxKeys,
 		}
 
-		output, err := s.s3.ListObjectsV2(context.TODO(), input)
+		output, err := s.s3.ListObjectsV2(ctx, input)
 		if err != nil {
 			return nil, err
 		}
