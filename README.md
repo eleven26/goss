@@ -199,3 +199,7 @@ size, err := goss.Size("test/test.txt")
 3. [七牛云: AWS S3 兼容](https://developer.qiniu.com/kodo/4086/aws-s3-compatible)
 4. 华为云：支持 s3，但是官网文档找不到相关关于 s3 兼容的相关描述
 5. [minio: AWS S3 Compatibility](https://min.io/product/s3-compatibility)
+
+## 注意事项
+
+1. 七牛云的 `endpoint` 和 `region` 配置请参考这个文档：[AWS S3 兼容 - 服务域名](https://developer.qiniu.com/kodo/4088/s3-access-domainname)
