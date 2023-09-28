@@ -74,7 +74,7 @@ goss, err := goss.New(goss.WithConfig(&Config{
 
 ```go
 // goss.GetString 会获取路径指定的文件，返回字符串
-fmt.Println(goss.GetString("test/foo.txt"))
+fmt.Println(goss.GetString(context.TODO(), "test/foo.txt"))
 ```
 
 
@@ -100,7 +100,7 @@ fmt.Println(goss.GetString("test/foo.txt"))
 ```go
 data := []byte("this is some data stored as a byte slice in Go Lang!")
 r := bytes.NewReader(data)
-err := goss.Put("test/test.txt", r)
+err := goss.Put(context.TODO(), "test/test.txt", r)
 ```
 
 ### PutFromFile
