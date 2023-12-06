@@ -15,9 +15,7 @@ type Config struct {
 }
 
 func (c *Config) validate() error {
-	if c.Bucket == "" || c.AccessKey == "" || c.SecretKey == "" || c.Endpoint == "" || c.Region == "" {
-		return errors.New("configuration not correct")
-	}
+
 
 	return nil
 }
